@@ -243,12 +243,13 @@ def ejecutar_script():
         p2 = str(p).zfill(2) 
         os.system('echo ' +password+' | sudo -S ip tuntap add tapwrt'+p1+' mode tap')
         os.system('echo ' +password+' | sudo -S ifconfig tapwrt'+p1+' inet 192.168.'+p1+'.1 up')
-        os.system('vde_switch -d --hub -s /tmp/num'+p1+' -tap tapwrt'+p1+' -m 666 ' )
+        os.system('vde_switch -d --hub -s /tmp/num'+p1+' -tap tapwrt'+p1+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
         os.system('VBoxManage clonevm ' + v_name_base + ' --name num'+p1+' --register')
-        os.system('VBoxManage modifyvm num'+p1+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/num'+p1+'[2] --macaddress2 8002000007'+ p2)
         os.system('VBoxManage modifyvm num'+p1+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 8001000007'+ p2)
+        os.system('VBoxManage modifyvm num'+p1+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/num'+p1+'[2] --macaddress2 8002000007'+ p2)       
+        os.system('VBoxManage modifyvm num'+p1+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/num'+p1+'[3] --macaddress3 8003000007'+ p2)
         os.system('VBoxManage startvm num'+p1 +' --type headless') #--type headless
-        os.system('echo ' +password+' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
+    os.system('echo ' +password+' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
     ejecutar_enlace()
     progresbar()
     run = 1	     
@@ -292,10 +293,10 @@ def kill_script():
             os.system('echo ' +password+' | sudo -S rm -rf /tmp/num' + p1)
             os.system('echo ' +password+' | sudo -S ip addr del 192.168.0.1' + p1 +'/24 dev tapwrt' +p1)
             os.system('echo ' +password+' | sudo -S ip link delete tapwrt' +p1)
-            os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
-            os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
             os.system('VBoxManage controlvm num' + p1 + ' poweroff')
             os.system('VBoxManage unregistervm --delete num' + p1 )
+        os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
+        os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
     run =0
 
 def near(punto):
@@ -415,7 +416,7 @@ per_paq = 0
 per_bit = 0
 run = 0
 vms = 0
-v_name_base= 'openwrt'
+v_name_base= 'openwrt2i'
 dir_trabajo = os.getcwd()
 scrip_file =dir_trabajo +  '/geto.sh'
 archivo_corriente =dir_trabajo + '/data'
