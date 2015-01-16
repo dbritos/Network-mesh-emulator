@@ -162,7 +162,7 @@ class wireClass(object):
 		if not self.running:
 			od = 'wirefilter'+' --daemon -v /tmp/' + self.canal + self.s_str +':/tmp/'+ self.canal  + self.d_str
 			if self.prop['loss'] !=0:	od = od + ' -l ' + str(self.prop['loss']) 
-			if self.prop['delay'] !=0:	od = od + ' -d ' + str(self.prop['delay']) + '' + str(self.prop['delay']/2) 
+			if self.prop['delay'] !=0:	od = od + ' -d ' + str(self.prop['delay']) + '+' + str(self.prop['delay']/2 )+ 'N'
 			if self.prop['dup'] !=0:	od = od + ' -D ' + str(self.prop['dup'])
 			if self.prop['bandwith'] !=0:	od = od + ' -b ' + str(self.prop['bandwith'])
 			if self.prop['speed'] !=0:	od = od + ' -s ' + str(self.prop['speed'])
@@ -171,7 +171,6 @@ class wireClass(object):
 			os.system(od)
 			self.running = True
 	def stop(self):
-		
 		self.running = False
 
 def get_packets(signal):
@@ -264,7 +263,7 @@ def stop_wirefilter():
 		n.stop()
 	  
 def stop_mesh(signal):
-	global nodolist
+#	global nodolist
 	stop_wirefilter() 
 	os.system('killall -q vde_switch') 
 	for n in nodolist:
