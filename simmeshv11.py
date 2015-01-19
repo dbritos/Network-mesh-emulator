@@ -16,12 +16,28 @@ wire_prop ={'loss':0,'delay':0,'dup':0,'bandwith':0,'speed':0,
 password = ''
 v_name_base= 'openwrt'
 
-current_wire = []
+
 
 class LinkList(list):
 	def __init__(self):
 		self.ll = []
+		self.current_wire = None 
 
+	def stop(self):
+		os.system('killall -q wirefilter') 
+		for x in self:
+			x.stop()
+			
+	def start(self):
+		for x in self:
+			x.start()
+			
+	def set_current_wire(self,sdds):
+		for x in self:
+			if x.sd in sdds:
+				self.current_wire = sdds
+	def __del__(self):
+		print "Link list  has been deleted"		
 
 class NodoList(list):
 	def __init__(self):
@@ -31,15 +47,23 @@ class NodoList(list):
     
 	def set_current(self,no):
 		self.current = no
-    
-	def get_current(self):
-		return self.current
-    
+
 	def set_cur_pos(self,pos):
 		for x in self:
 			if x.pos==pos:
 				self.current = x
 				
+	def stop(self):
+		for x in self:
+			x.stop()
+			
+	def start(self):
+		for x in self:
+			x.start()
+			
+	def __del__(self):
+		print "Nodo list  has been deleted"			
+
 link_color24 = LinkList()
 link_color50 = LinkList()
 nodolist = NodoList()
@@ -135,8 +159,7 @@ class nodoClass(object):
 			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+self.octet_str+'[3] --macaddress3 ' + self.eth2.mac)
 			os.system('VBoxManage startvm num'+self.octet_str ) # + '--type headless'
 			self.running = True
-			print self.eth0.mac
-		
+
 class wireClass(object):
 	def __init__(self,src,dst,quality):
 		self.s = src
@@ -144,8 +167,8 @@ class wireClass(object):
 		self.sd = src,dst
 		self.ds = dst,src
 		self.quality = quality
-		self.s_str = str(int(self.s[0]//100)) + str(int(self.s[1]//100))
-		self.d_str = str(int(self.d[0]//100)) + str(int(self.d[1]//100)) 
+		self.s_str = str(point2num(self.s))
+		self.d_str = str(point2num(self.d))
 		self.name = "wire" +self.s_str+'-' + self.d_str
 		self.canal =self.quality['channel']
 		self.running = False
@@ -155,8 +178,10 @@ class wireClass(object):
 
 	def __del__(self):
 		if nodolist.run: 
-			stop_wirefilter()
-			start_wirefilter()
+			link_color24.stop()
+			link_color50.stop()
+			link_color24.start()
+			link_color50.start()
 
 	def  start(self):
 		if not self.running:
@@ -170,6 +195,7 @@ class wireClass(object):
 			if self.prop['damage'] !=0:	od = od + ' -n ' + str(self.prop['damage'])
 			os.system(od)
 			self.running = True
+			print od
 	def stop(self):
 		self.running = False
 
@@ -181,7 +207,7 @@ def get_packets(signal):
 def point2num(point):
     return int((point[0] // 100)*10 + point[1]//100)
 
-#set point close to cuadricul intersection
+#set point close to grid node
 def near(punto):
 	x,y = punto
 	xi,xd = divmod(x, 100)
@@ -193,8 +219,8 @@ def near(punto):
 	return xi*100,yi*100
 
 def open_mesh(widget):
-	global nodo,link_color24,link_color50,nodolist
-	dialog = gtk.FileChooserDialog("Select work directory",
+	global link_color24,link_color50,nodolist
+	dialog = gtk.FileChooserDialog("Select a mesh file",
 		None,
 		gtk.FILE_CHOOSER_ACTION_OPEN,
 		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
@@ -205,78 +231,19 @@ def open_mesh(widget):
 		with open(file_path, 'rb') as f:
 			nodolist,link_color24,link_color50 = pickle.load(f)
 		archivo_corriente = file_path
+	elif response == gtk.RESPONSE_CANCEL:
 		dialog.destroy()
-    
-def responseToDialog(entry, dialog, response):
-    dialog.response(response) 
-
-def getPassword():
-
-    dialog = gtk.MessageDialog(
-        None,
-        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-        gtk.MESSAGE_QUESTION,
-        gtk.BUTTONS_OK,
-        None)
-    dialog.set_markup('Please enter your <b>password</b>:')
-    #create the text input field
-    entry = gtk.Entry()
-    #allow the user to press enter to do ok
-    entry.connect("activate", responseToDialog, dialog, gtk.RESPONSE_OK)
-    entry.set_visibility(False)
-    #create a horizontal box to pack the entry and a label
-    hbox = gtk.HBox()
-    hbox.pack_start(gtk.Label("Password:"), False, 5, 5)
-    hbox.pack_end(entry)
-    #some secondary text
-    dialog.format_secondary_markup("This will be used for create interfaces in your local machine")
-    #add it and show it
-    dialog.vbox.pack_end(hbox, True, True, 0)
-    dialog.show_all()
-    #go
-    dialog.run()
-    text = entry.get_text()
-    dialog.destroy()
-    return text    
-
-def run_mesh(signal):
-	global nodolist
-	for n in nodolist:
-		n.start()
-	start_wirefilter()
-	os.system('echo ' +password+' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
-	nodolist.run = True
-
-def start_wirefilter(): 
-	print 'starting' 
-	for n in link_color24:
-		n.start()
-	for n in link_color50:
-		n.start()
-
-def stop_wirefilter(): 
-	os.system('killall -q wirefilter') 
-	print 'stoping' 
-	for n in link_color24:
-		n.stop()
-	for n in link_color50:
-		n.stop()
-	  
-def stop_mesh(signal):
-#	global nodolist
-	stop_wirefilter() 
-	os.system('killall -q vde_switch') 
-	for n in nodolist:
-		n.stop()
-	os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
-	os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
-	nodolist.run = False
-     
-
+	dialog.destroy()
+	
 def save_mesh(signal):
-	dialog = gtk.FileChooserDialog("Select work directory",
+	datos =nodolist,link_color24,link_color50
+	with open(dir_trabajo + '/data.ms', 'wb') as f:
+			pickle.dump(datos, f)
+			
+def saveas_mesh(signal):
+	dialog = gtk.FileChooserDialog("Select or create a mesh file",
 		None,
-		gtk.FILE_CHOOSER_ACTION_OPEN,
+		gtk.FILE_CHOOSER_ACTION_SAVE,
 		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
 		gtk.STOCK_OPEN, gtk.RESPONSE_OK))
 	response = dialog.run()
@@ -286,23 +253,90 @@ def save_mesh(signal):
 		with open(file_path, 'wb') as f:
 			pickle.dump(datos, f)
 		archivo_corriente = file_path
+	elif response == gtk.RESPONSE_CANCEL:
 		dialog.destroy()
+	dialog.destroy()
+
+def select_folder(signal):
+	global dir_trabajo
+	dialog = gtk.FileChooserDialog("Select work directory",
+		None,
+		gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+		gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+	response = dialog.run()
+	if response == gtk.RESPONSE_OK:
+		dir_trabajo = dialog.get_filename()
+	elif response == gtk.RESPONSE_CANCEL:
+		dialog.destroy()
+	dialog.destroy()
+
+
+   
+def responseToDialog(entry, dialog, response):
+    dialog.response(response) 
+
+def getPassword():
+    dialog = gtk.MessageDialog(
+        None,
+        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+        gtk.MESSAGE_QUESTION,
+        gtk.BUTTONS_OK,
+        None)
+    dialog.set_markup('Please enter your <b>password</b>:')
+    entry = gtk.Entry()
+    entry.connect("activate", responseToDialog, dialog, gtk.RESPONSE_OK)
+    entry.set_visibility(False)
+    hbox = gtk.HBox()
+    hbox.pack_start(gtk.Label("Password:"), False, 5, 5)
+    hbox.pack_end(entry)
+    dialog.format_secondary_markup("This will be used for create interfaces in your local machine")
+    dialog.vbox.pack_end(hbox, True, True, 0)
+    dialog.show_all()
+    dialog.run()
+    text = entry.get_text()
+    dialog.destroy()
+    return text    
+
+def run_mesh(signal):
+	if not nodolist.run:
+		nodolist.start()
+		link_color24.start()
+		link_color50.start()
+		os.system('echo ' +password+' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
+		nodolist.run = True
+
+
+def stop_mesh(signal):
+	if nodolist.run:
+		link_color24.stop()
+		link_color50.stop()
+		os.system('killall -q vde_switch') 
+		nodolist.stop()
+		os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
+		os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
+		nodolist.run = False
+
+def delete_mesh(signal):  
+	global nodolist,link_color24,link_color50
+	if not nodolist.run:
+		link_color24 = []
+		link_color50 = []
+		nodolist = []
 
 def remover_nodos(signal):
-	global nodolist,link_color24,link_color50
+
 	link = [(j.sd) for j in link_color24]
-	print link	
 	o = [(j[0]) for j in link]
 	d = [(j[1]) for j in link]
 	link = [(j.sd) for j in link_color50]
-	print link	
 	o5 = [(j[0]) for j in link]	
 	d5 = [(j[1]) for j in link]
 	for i in nodolist[:]:
-		if (i.pos not in o and i.pos not in d) and (i.pos not in o5 and i.pos not in d5) : nodolist.remove(i)
+		if (i.pos not in o and i.pos not in d) and (i.pos not in o5 and i.pos not in d5) : 
+			nodolist.remove(i)
 
 def remover_enlaces(signal):    
-	global nodolist,link_color24,link_color50
 	n = [(j.pos) for j in nodolist]
 	for i in link_color24[:]:	
 		linea= i.sd
@@ -313,26 +347,11 @@ def remover_enlaces(signal):
 		((x1,y1),(x2,y2))=linea
 		if (x1,y1) not  in n or (x2,y2) not in n: link_color50.remove(i)
 	if nodolist.run:
-		start_wirefilter()
-
-def select_folder(signal):
-	global dir_trabajo
-	dialog = gtk.FileChooserDialog("Select work directory",
-		None,
-		gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-		gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-
-	response = dialog.run()
-	if response == gtk.RESPONSE_OK:
-		dir_trabajo = dialog.get_filename()
-	dialog.destroy()
-
-
+		link_color24.start()
+		link_color50.start()
 
 # Create a new backing pixmap of the appropriate size
 def configure_event(widget, event):
-
     return True	
     
 def dibujar(widget):
@@ -357,7 +376,7 @@ def dibujar(widget):
 	cr.select_font_face('Sans')
 	cr.set_font_size(12)
 	for l in link_color24:
-		if l.sd in current_wire:
+		if l.sd in link_color24.current_wire:
 			cr.set_source_rgba(1.0, 1.0, 1.0,1.0) 
 			cr.set_line_width (2.0)
 			#Draw wire property for current nodo
@@ -376,7 +395,7 @@ def dibujar(widget):
 		cr.line_to(xf,yf)
 		cr.stroke() 
 	for l in link_color50:
-		if l.sd in current_wire:
+		if l.sd in link_color50.current_wire:
 			cr.set_source_rgba(1.0, 1.0, 1.0,1.0) 
 			cr.set_line_width (2.0)
 			#Draw wire property for current nodo
@@ -440,62 +459,69 @@ def button_press_event(widget, event):
 	return True
 
 def button_release_event(widget, event):
-	global link_color24,link_color50,wire_prop,current_wire,nodolist
+	global wire_prop
 	fin = near((event.x, event.y))
-	if event.button == 1 and cr != None:
-		if inicio==fin:
-			if not any(x.pos==inicio for x in nodolist):
-				nodolist.append(nodoClass(inicio))
-				nodolist.set_cur_pos(inicio)
-		elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
-			current_wire = [(inicio,fin),(fin,inicio)]
-			if wire_prop['channel'] == 'c24GHz':
-				if (not any(x.sd in current_wire  for x in link_color24)):
-					link_color24.append(wireClass(inicio,fin, wire_prop))
-					if nodolist.run: start_wirefilter()
-			if wire_prop['channel'] == 'c50GHz':
-				if (not any(x.sd in current_wire  for x in link_color50)):
-					link_color50.append(wireClass(inicio,fin, wire_prop))
-					if nodolist.run: start_wirefilter()
-	if event.button == 2 and cr != None:
-		if inicio==fin:
-			if any(x.pos==inicio for x in nodolist):
-				nodolist.set_cur_pos(inicio)
-		elif wire_prop['channel'] == 'c24GHz':
-			current_wire = [(inicio,fin),(fin,inicio)]
-			if any(x.pos in [inicio,fin] for x in nodolist):
-				if any(x.sd in current_wire  for x in link_color24):
-					for x in link_color24: 
-						if x.ds in current_wire:
-							wire_prop = x.prop
-		elif wire_prop['channel'] == 'c50GHz':
-			current_wire = [(inicio,fin),(fin,inicio)]
-			if any(x.pos in [inicio,fin] for x in nodolist):
-				if any(x.sd in current_wire  for x in link_color50):
-					for x in link_color50: 
-						if x.ds in current_wire:
-							wire_prop = x.prop
+	if fin[0] < 950 and fin[0] > 50 and fin[1] < 950 and fin[1] > 50:
+		if event.button == 1 and cr != None:
+			if inicio==fin:
+				if not any(x.pos==inicio for x in nodolist):
+					nodolist.append(nodoClass(inicio))
+					nodolist.set_cur_pos(inicio)
+			elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
+				link_color24.current_wire = [(inicio,fin),(fin,inicio)]
+				link_color50.current_wire = [(inicio,fin),(fin,inicio)]
+				if wire_prop['channel'] == 'c24GHz':
+					if (not any(x.sd in link_color24.current_wire  for x in link_color24)):
+						link_color24.append(wireClass(inicio,fin, wire_prop))
+						if nodolist.run:
+							link_color24.start()
+							link_color50.start()
+				if wire_prop['channel'] == 'c50GHz':
+					if (not any(x.sd in link_color50.current_wire  for x in link_color50)):
+						link_color50.append(wireClass(inicio,fin, wire_prop))
+						if nodolist.run: 
+							link_color24.start()
+							link_color50.start()
+		if event.button == 2 and cr != None:
+			if inicio==fin:
+				if any(x.pos==inicio for x in nodolist):
+					nodolist.set_cur_pos(inicio)
+			else:
+				link_color24.current_wire = [(inicio,fin),(fin,inicio)]
+				if wire_prop['channel'] == 'c24GHz':
+					if any(x.pos in [inicio,fin] for x in nodolist):
+						if any(x.sd in link_color24.current_wire  for x in link_color24):
+							for x in link_color24: 
+								if x.ds in link_color24.current_wire:
+									wire_prop = x.prop
+				link_color50.current_wire = [(inicio,fin),(fin,inicio)]
+				if wire_prop['channel'] == 'c50GHz':
+					if any(x.pos in [inicio,fin] for x in nodolist):
+						if any(x.sd in link_color50.current_wire  for x in link_color50):
+							for x in link_color50: 
+								if x.ds in link_color50.current_wire:
+									wire_prop = x.prop
 
-	elif event.button == 3 and cr != None:
-		if inicio==fin:
-			if any(x.pos==inicio for x in nodolist):
-				for x in nodolist:
-					if x.pos==inicio:
-						nid=nodolist.index(x)
-						i = nodolist.pop(nid)
-		elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
-			if wire_prop['channel'] == 'c24GHz':
-				for x in link_color24:
-					if x.sd in [(inicio,fin),(fin,inicio)]:
-						lid=link_color24.index(x)
-						i = link_color24.pop(lid)
-			if wire_prop['channel'] == 'c50GHz':
-				for x in link_color50:
-					if x.sd in [(inicio,fin),(fin,inicio)]:
-						lid=link_color50.index(x)
-						i = link_color50.pop(lid)
+		elif event.button == 3 and cr != None:
+			if inicio==fin:
+				if any(x.pos==inicio for x in nodolist):
+					for x in nodolist:
+						if x.pos==inicio:
+							nid=nodolist.index(x)
+							i = nodolist.pop(nid)
+			elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
+				if wire_prop['channel'] == 'c24GHz':
+					for x in link_color24:
+						if x.sd in [(inicio,fin),(fin,inicio)]:
+							lid=link_color24.index(x)
+							i = link_color24.pop(lid)
+				if wire_prop['channel'] == 'c50GHz':
+					for x in link_color50:
+						if x.sd in [(inicio,fin),(fin,inicio)]:
+							lid=link_color50.index(x)
+							i = link_color50.pop(lid)
 
-	dibujar(widget)
+		dibujar(widget)
 	return True
 
 def wire_show(signal):
@@ -653,8 +679,25 @@ class wire(gtk.Window):
 		button_close.grab_default() 
 
 		self.show()
+def get_mesh(dir_trabajo):
+	global nodolist,link_color24,link_color50
+	dm = dir_trabajo + '/data.ms'
+	if  os.path.isfile('data.ms'):
+		with open(dm, 'rb') as f:
+			nodolist,link_color24,link_color50 = pickle.load(f)
 		
-
+		
+def create_colorfull(dir_trabajo):
+	f = open(dir_trabajo + '/colourful.rc','w')
+	f.write('port/setcolourful 1\n')
+	f.write('port/create 1\n')
+	f.write('port/create 2\n')
+	f.write('port/create 3\n')
+	f.write('port/create 4\n')
+	f.write('port/create 5\n')
+	f.write('port/setcolour 1 1\n')
+	f.write('port/setcolour 2 2\n')
+	f.close()
 
 class MenuApp(gtk.Window):
 	def __init__(self):
@@ -688,10 +731,11 @@ class MenuApp(gtk.Window):
  
 		save = gtk.MenuItem("Save")
 		filemenu.append(save)
- 
+		save.connect("activate", save_mesh)
+		 
 		saveas = gtk.MenuItem("Save as")
 		filemenu.append(saveas)
-		saveas.connect("activate", save_mesh)
+		saveas.connect("activate", saveas_mesh)
 	# separator
 		separat = gtk.SeparatorMenuItem()
 		filemenu.append(separat)
@@ -716,7 +760,8 @@ class MenuApp(gtk.Window):
 	# create the items for Edit menu
 		delmesh = gtk.MenuItem("Delete Mesh")
 		editmenu.append(delmesh)
-	
+		delmesh.connect("activate",delete_mesh)
+		
 		delnodo = gtk.MenuItem("Delete Nodo")
 		editmenu.append(delnodo)
 		delnodo.connect("activate",remover_nodos)
@@ -795,15 +840,12 @@ class MenuApp(gtk.Window):
 		gobject.timeout_add( 1000, self.tick )
 		global password
 		password = getPassword()
+		global dir_trabajo
 		dir_trabajo = os.getcwd()
 		if  not os.path.isfile('colourful.rc'):
-			parent = None
-			md = gtk.MessageDialog(parent, 
-			gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, 
-			gtk.BUTTONS_CLOSE, "colourful.rc no existe")
-			md.run()
-			
-		
+			create_colorfull(dir_trabajo)
+		get_mesh(dir_trabajo)
+
 	def tick (self):
 	    self.queue_draw()
 	    return True
