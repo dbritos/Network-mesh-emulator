@@ -42,7 +42,7 @@ class LinkList(list):
 class NodoList(list):
 	def __init__(self):
 		self.nl = []
-		self.current = None 
+		self.current = None
 		self.run = False
     
 	def set_current(self,no):
@@ -182,6 +182,7 @@ class wireClass(object):
 			link_color50.stop()
 			link_color24.start()
 			link_color50.start()
+		print 'wire deleted'
 
 	def  start(self):
 		if not self.running:
@@ -318,14 +319,17 @@ def stop_mesh(signal):
 		nodolist.run = False
 
 def delete_mesh(signal):  
-	global nodolist,link_color24,link_color50
 	if not nodolist.run:
-		link_color24 = []
-		link_color50 = []
-		nodolist = []
+		print 'borrando'
+		for x  in link_color24[:]: 
+			link_color24.remove(x)
+		for x  in link_color50[:]: 
+			link_color50.remove(x)
+		for x  in nodolist[:]:
+			nodolist.remove(x)
+
 
 def remover_nodos(signal):
-
 	link = [(j.sd) for j in link_color24]
 	o = [(j[0]) for j in link]
 	d = [(j[1]) for j in link]
@@ -415,7 +419,7 @@ def dibujar(widget):
 		cr.stroke() 
 	#Draw nodo	
 	for po in nodolist:
-		p =po.pos
+		p = po.pos
 		cr.arc(p[0],p[1], 12, 0, 2*math.pi)
 		if po.pos == nodolist.current.pos:
 			#Draw originators for curren nodo
@@ -697,6 +701,7 @@ def create_colorfull(dir_trabajo):
 	f.write('port/create 5\n')
 	f.write('port/setcolour 1 1\n')
 	f.write('port/setcolour 2 2\n')
+	f.write('port/setcolour 3 2\n')
 	f.close()
 
 class MenuApp(gtk.Window):
