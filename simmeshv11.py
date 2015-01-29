@@ -8,13 +8,13 @@ import pickle
 import os
 import netsnmp
 import time
-
+import vboxapi 
 
 dir_trabajo = ''
 wire_prop ={'loss':0,'delay':0,'dup':0,'bandwith':0,'speed':0,
 				'capacity':0,'damage':0,'channel':'c24GHz'}
 password = ''
-v_name_base= 'openwrt'
+v_name_base = 'openwrt'
 
 
 
@@ -116,6 +116,7 @@ class nodoClass(object):
 		self.bat0=  interface(5,'bat0',str(self),self.smp_ip)		
 		self.interfases =[self.tapwrt,self.oam,self.lo,self.eth0,self.eth1,self.eth2,self.bat0]
 		self.originator = self.getoriginators()
+		self.vm = v_name_base
 		self.running = False
 		print "Node " + self.name + " has been created"   
 
@@ -151,13 +152,18 @@ class nodoClass(object):
 		if not self.running:
 			os.system('echo ' +password+' | sudo -S ip tuntap add tapwrt'+self.octet_str+' mode tap')
 			os.system('echo ' +password+' | sudo -S ifconfig tapwrt'+self.octet_str+' ' +self.tapwrt.ip + ' up')
-			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapwrt'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
-			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapwrt'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')        
-			os.system('VBoxManage clonevm ' + v_name_base + ' --name num'+self.octet_str+' --register')
-			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + self.eth0.mac)
-			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+self.octet_str+'[2] --macaddress2 ' + self.eth1.mac)       
-			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+self.octet_str+'[3] --macaddress3 ' + self.eth2.mac)
-			os.system('VBoxManage startvm num'+self.octet_str ) # + '--type headless'
+			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapwrt'+self.octet_str+' -m 666 -f '
+				+ dir_trabajo + '/colourful.rc')
+			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapwrt'+self.octet_str+' -m 666 -f '
+				+ dir_trabajo + '/colourful.rc')        
+			os.system('VBoxManage clonevm ' + self.vm + ' --name num'+self.octet_str+' --register')
+			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' 
+				+ self.eth0.mac)
+			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'
+				+ self.octet_str+'[2] --macaddress2 ' + self.eth1.mac)       
+			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'
+				+ self.octet_str+'[3] --macaddress3 ' + self.eth2.mac)
+			os.system('VBoxManage startvm num'+ self.octet_str ) # + '--type headless'
 			self.running = True
 
 class wireClass(object):
@@ -423,21 +429,22 @@ def dibujar(widget):
 		cr.arc(p[0],p[1], 12, 0, 2*math.pi)
 		if po.pos == nodolist.current.pos:
 			#Draw originators for curren nodo
-		    o = po.getoriginators()
-		    if o != ['None']:po.originator = o
-		    for i in range(len(po.originator)):
-			cr.move_to(125*(i%8),920+(i//8)*15)
-			cr.show_text(str(po.originator[i]))
+			o = po.getoriginators()
+			if o != ['None']:po.originator = o
+			for i in range(len(po.originator)):
+				cr.move_to(125*(i%8),920+(i//8)*15)
+				cr.show_text(str(po.originator[i]))
 			#Drow Interface packets for curren nodo
-		    for i in po.interfases:
-			if i.ind:
-			    r,t = i.rxtx_packets()
-			    cr.move_to(200*(i.ind-1),15)
-			    cr.show_text(i.name+' rx: '+r+' tx: '+t)
-			
-		    cr.set_source_rgba(0.3, 1.0, 0.3,1.0) 
+			for i in po.interfases:
+				if i.ind:
+					r,t = i.rxtx_packets()
+					cr.move_to(200*(i.ind-1),15)
+					cr.show_text(i.name+' rx: '+r+' tx: '+t)
+			cr.move_to(1,60)
+			cr.show_text('vm: ' + po.vm)
+			cr.set_source_rgba(0.3, 1.0, 0.3,1.0) 
 		else:
-		    cr.set_source_rgba(0.1,0.6, 0.1,1.0) 
+			cr.set_source_rgba(0.1,0.6, 0.1,1.0) 
 		cr.fill()
 		cr.stroke()
 		#Draw bat0 packets for each nodo
@@ -527,6 +534,32 @@ def button_release_event(widget, event):
 
 		dibujar(widget)
 	return True
+
+def select_vm(signal):
+	window = gtk.Window()
+	window.connect('destroy', lambda w: select_vm)
+	window.set_title("SELECT VIRTUAL MACHINE")
+	combobox = gtk.combo_box_new_text()
+	window.add(combobox)
+	virtualBoxManager = vboxapi.VirtualBoxManager(None, None) 
+	vbox = virtualBoxManager.vbox
+	vboxVMList = virtualBoxManager.getArray(vbox, 'machines') 
+	vboxNameList = [mach.name for mach in vboxVMList]
+	for i in vboxNameList:
+		combobox.append_text(str(i))
+	combobox.connect('changed', changed_cb)
+	combobox.set_active(0)
+	window.show_all()
+	return
+
+def changed_cb(combobox):
+	global v_name_base
+	model = combobox.get_model()
+	index = combobox.get_active()
+	if index:
+		v_name_base = model[index][0]
+	return
+
 
 def wire_show(signal):
 	wire()
@@ -679,10 +712,9 @@ class wire(gtk.Window):
 
 		vbox1.show()
 		vbox_app.add(vbox1)
-
 		button_close.grab_default() 
-
 		self.show()
+		
 def get_mesh(dir_trabajo):
 	global nodolist,link_color24,link_color50
 	dm = dir_trabajo + '/data.ms'
@@ -776,8 +808,12 @@ class MenuApp(gtk.Window):
 		dellink.connect("activate", remover_enlaces)
 		
 		editwire = gtk.MenuItem("Edit Wire")
-		editmenu.append(editwire)	
+		editmenu.append(editwire)
 		editwire.connect("activate", wire_show)
+		
+		selectvm = gtk.MenuItem("Select VM")
+		editmenu.append(selectvm)
+		selectvm.connect("activate", select_vm)		
 		
 	# create the run menu and attach it to the top item
 		runmenu = gtk.Menu()
