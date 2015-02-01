@@ -1,6 +1,5 @@
-Mesh Network simulator
-======================
+Network Mesh emulator
+=====================
 
-This is a network simmulator of mesh network with bataman-adv
-Is written in python and work with Virtualbox and vde-switch.
+This is a network Mesh emulator with batman-adv. Is written in python and work with Virtualbox and vde-switch.
 
