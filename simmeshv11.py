@@ -132,8 +132,10 @@ class nodoClass(object):
 		if self.running:
 			os.system('echo ' +password+' | sudo -S rm -rf /tmp/c24GHz' + self.octet_str)
 			os.system('echo ' +password+' | sudo -S rm -rf /tmp/c50GHz' + self.octet_str)
-			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapwrt' +self.octet_str)
-			os.system('echo ' +password+' | sudo -S ip link delete tapwrt' +self.octet_str)
+			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapc24GHz' +self.octet_str)
+			os.system('echo ' +password+' | sudo -S ip link delete tapc24GHz' +self.octet_str)
+			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapc50GHz' +self.octet_str)
+			os.system('echo ' +password+' | sudo -S ip link delete tapc50GHz' +self.octet_str)
 			os.system('VBoxManage controlvm num' + self.octet_str + ' poweroff')
 			time.sleep(1)
 			os.system('VBoxManage unregistervm --delete num' + self.octet_str )
@@ -150,11 +152,13 @@ class nodoClass(object):
 	
 	def start(self):
 		if not self.running:
-			os.system('echo ' +password+' | sudo -S ip tuntap add tapwrt'+self.octet_str+' mode tap')
-			os.system('echo ' +password+' | sudo -S ifconfig tapwrt'+self.octet_str+' ' +self.tapwrt.ip + ' up')
-			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapwrt'+self.octet_str+' -m 666 -f '
+			os.system('echo ' +password+' | sudo -S ip tuntap add tapc24GHz'+self.octet_str+' mode tap')
+			os.system('echo ' +password+' | sudo -S ifconfig tapc24GHz'+self.octet_str+' ' +self.tapwrt.ip + ' up')
+			os.system('echo ' +password+' | sudo -S ip tuntap add tapc50GHz'+self.octet_str+' mode tap')
+			os.system('echo ' +password+' | sudo -S ifconfig tapc50GHz'+self.octet_str+' ' +self.tapwrt.ip + ' up')
+			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapc24GHz'+self.octet_str+' -m 666 -f '
 				+ dir_trabajo + '/colourful.rc')
-			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapwrt'+self.octet_str+' -m 666 -f '
+			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapc50GHz'+self.octet_str+' -m 666 -f '
 				+ dir_trabajo + '/colourful.rc')        
 			os.system('VBoxManage clonevm ' + self.vm + ' --name num'+self.octet_str+' --register')
 			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' 
@@ -388,8 +392,8 @@ def dibujar(widget):
 	for l in link_color24:
 		if l.sd in link_color24.current_wire:
 			cr.set_source_rgba(1.0, 1.0, 1.0,1.0) 
-			cr.set_line_width (2.0)
-			#Draw wire property for current nodo
+			cr.set_line_width (4.0)
+			#Draw wire property for current wire
 			cr.set_source_rgba(0.8, 0.4, 0.6,1.0)  
 			i=0
 			for p in l.prop:
@@ -407,8 +411,8 @@ def dibujar(widget):
 	for l in link_color50:
 		if l.sd in link_color50.current_wire:
 			cr.set_source_rgba(1.0, 1.0, 1.0,1.0) 
-			cr.set_line_width (2.0)
-			#Draw wire property for current nodo
+			cr.set_line_width (4.0)
+			#Draw wire property for current wire
 			cr.set_source_rgba(0.4, 0.8, 0.6,1.0) 
 			i=0
 			for p in l.prop:
@@ -428,6 +432,7 @@ def dibujar(widget):
 		p = po.pos
 		cr.arc(p[0],p[1], 12, 0, 2*math.pi)
 		if po.pos == nodolist.current.pos:
+			cr.set_source_rgba(1.0, 0.0, 1.0,1.0) 
 			#Draw originators for curren nodo
 			o = po.getoriginators()
 			if o != ['None']:po.originator = o
@@ -435,6 +440,7 @@ def dibujar(widget):
 				cr.move_to(125*(i%8),920+(i//8)*15)
 				cr.show_text(str(po.originator[i]))
 			#Drow Interface packets for curren nodo
+			cr.set_source_rgba(0.0, 1.0, 0.0,1.0) # green
 			for i in po.interfases:
 				if i.ind:
 					r,t = i.rxtx_packets()
