@@ -44,8 +44,8 @@ In the botton of the screen there are the originatos list for the node number 45
 
 In the next figure is shown the node 45 making a ping to node number 71, the times are good.
 
-![Example](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/ping.png "ping")
+![Ping](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/ping.png "ping")
 
-In the last figure is shown the cpu and memory usage for 36 nodes running
+In the last figure is shown the cpu and memory usage for 36 nodes running together.
 
-![Example]
+![CPU usage](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/Untitled.png "cpu usage")
