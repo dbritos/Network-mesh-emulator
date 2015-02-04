@@ -36,5 +36,5 @@ Read the wiki Emulator Manual.
 
 ####Example.
 
-![Example](http://)
+![Example](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/example.png "Example")
 
