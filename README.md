@@ -36,5 +36,11 @@ Read the wiki Emulator Manual.
 
 ####Example.
 
+In this example one can view four networks of nine nodes each one with links in 2.4 GHz band and connected the four network with links of 5.0 GHz Band.
+
 ![Example](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/example.png "Example")
+
+In the botton of the screen there are the originatos list for the node number 45.
+
+
 
