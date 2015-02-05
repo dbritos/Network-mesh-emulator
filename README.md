@@ -13,13 +13,13 @@ This is a network Mesh emulator with batman-adv. Is written in python and work w
 
 ####Prerequisites
 
-Linux (developed on Ubuntu 14.08)
-Python 2.7
-VirtualBox.
-OpenWrt.
-vde-switch.
-vde_switch colour patch.
-python library pygtk, gobject, cairo,math, pickle os, netsnmp, time and vboxapi.
+- Linux (developed on Ubuntu 14.08)
+- Python 2.7
+- VirtualBox.
+- OpenWrt.
+- vde-switch.
+- vde_switch colour patch.
+- python library pygtk, gobject, cairo,math, pickle os, netsnmp, time and vboxapi.
 
 ####Installation
 
