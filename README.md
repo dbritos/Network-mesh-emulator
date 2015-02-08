@@ -7,19 +7,19 @@ This is a network Mesh emulator with batman-adv. Is written in python and work w
 
 - Its possible to build topologies to 81 nodes.
 - Each node can be a different virtual machine.
-- Compativility with Wireshark.
-- Its posible change the links proppiertys while the emulation is running.
+- Compatibility with Wireshark.
+- Its possible change the links properties while the emulation is running.
 - Easy access to each virtual machine.
 
 ####Prerequisites
 
-Linux (developed on Ubuntu 14.08)
-Python 2.7
-BirtualBox.
-OpenWrt.
-vde-switch.
-vde_switch colour patch.
-python library pygtk, gobject, cairo,math, pickle os, netsnmp, time and vboxapi.
+- Linux (developed on Ubuntu 14.08)
+- Python 2.7
+- VirtualBox.
+- OpenWrt.
+- vde-switch.
+- vde_switch colour patch.
+- python library pygtk, gobject, cairo,math, pickle os, netsnmp, time and vboxapi.
 
 ####Installation
 
@@ -40,7 +40,7 @@ In this example one can view four networks of nine nodes each one with links in 
 
 ![Example](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/example.png "Example")
 
-In the botton of the screen there are the originatos list for the node number 45.
+In the bottom of the screen there are the originators list for the node number 45.
 
 In the next figure is shown the node 59 making a ping to node number 71, the times are good.
 
