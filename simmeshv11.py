@@ -36,8 +36,6 @@ class LinkList(list):
 		for x in self:
 			if x.sd in sdds:
 				self.current_wire = sdds
-	def __del__(self):
-		print "Link list  has been deleted"		
 
 class NodoList(list):
 	def __init__(self):
@@ -60,9 +58,6 @@ class NodoList(list):
 	def start(self):
 		for x in self:
 			x.start()
-			
-	def __del__(self):
-		print "Nodo list  has been deleted"			
 
 link_color24 = LinkList()
 link_color50 = LinkList()
@@ -96,9 +91,6 @@ class interface(object):
 	    
 	def __str__(self):
 		return str(self.name)	
-    
-	def __del__(self):
-		print "Interfase " + self.name + " has been deleted"
 
 class nodoClass(object):
 	def __init__(self, p):
@@ -118,16 +110,13 @@ class nodoClass(object):
 		self.originator = self.getoriginators()
 		self.vm = v_name_base
 		self.running = False
-		print "Node " + self.name + " has been created"   
 
 	def __str__(self):
 		return str(self.num)
 
 	def __del__(self):
 		self.stop()	
-		print "Node " + self.name + " has been deleted"
-
-	    
+    
 	def stop(self):
 		if self.running:
 			os.system('echo ' +password+' | sudo -S rm -rf /tmp/c24GHz' + self.octet_str)
@@ -156,17 +145,12 @@ class nodoClass(object):
 			os.system('echo ' +password+' | sudo -S ifconfig tapc24GHz'+self.octet_str+' ' +self.tapwrt.ip + ' up')
 			os.system('echo ' +password+' | sudo -S ip tuntap add tapc50GHz'+self.octet_str+' mode tap')
 			os.system('echo ' +password+' | sudo -S ifconfig tapc50GHz'+self.octet_str+' ' +self.tapwrt.ip + ' up')
-			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapc24GHz'+self.octet_str+' -m 666 -f '
-				+ dir_trabajo + '/colourful.rc')
-			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapc50GHz'+self.octet_str+' -m 666 -f '
-				+ dir_trabajo + '/colourful.rc')        
+			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapc24GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
+			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapc50GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')        
 			os.system('VBoxManage clonevm ' + self.vm + ' --name num'+self.octet_str+' --register')
-			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' 
-				+ self.eth0.mac)
-			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'
-				+ self.octet_str+'[2] --macaddress2 ' + self.eth1.mac)       
-			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'
-				+ self.octet_str+'[3] --macaddress3 ' + self.eth2.mac)
+			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + self.eth0.mac)
+			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + self.eth1.mac)       
+			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + self.eth2.mac)
 			os.system('VBoxManage startvm num'+ self.octet_str ) # + '--type headless'
 			self.running = True
 
@@ -192,7 +176,6 @@ class wireClass(object):
 			link_color50.stop()
 			link_color24.start()
 			link_color50.start()
-		print 'wire deleted'
 
 	def  start(self):
 		if not self.running:
@@ -206,15 +189,15 @@ class wireClass(object):
 			if self.prop['damage'] !=0:	od = od + ' -n ' + str(self.prop['damage'])
 			os.system(od)
 			self.running = True
-			print od
+
 	def stop(self):
 		self.running = False
 
 def get_packets(signal):
     for n in nodolist:
-	for i in n.interfases:
-		print i.rxtx_packets()	
-	    
+		for i in n.interfases:
+			print i.rxtx_packets()
+    
 def point2num(point):
     return int((point[0] // 100)*10 + point[1]//100)
 
@@ -245,28 +228,39 @@ def open_mesh(widget):
 	elif response == gtk.RESPONSE_CANCEL:
 		dialog.destroy()
 	dialog.destroy()
+
+def message_stop():
+	md = gtk.MessageDialog(None, 
+			gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, 
+			gtk.BUTTONS_CLOSE, "Firs stop emulation")
+	md.run()
+	md.destroy()
 	
 def save_mesh(signal):
-	datos =nodolist,link_color24,link_color50
-	with open(dir_trabajo + '/data.ms', 'wb') as f:
-			pickle.dump(datos, f)
-			
-def saveas_mesh(signal):
-	dialog = gtk.FileChooserDialog("Select or create a mesh file",
-		None,
-		gtk.FILE_CHOOSER_ACTION_SAVE,
-		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-		gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-	response = dialog.run()
-	if response == gtk.RESPONSE_OK:
-		file_path = dialog.get_filename()    
+	if not nodolist.run:
 		datos =nodolist,link_color24,link_color50
-		with open(file_path, 'wb') as f:
-			pickle.dump(datos, f)
-		archivo_corriente = file_path
-	elif response == gtk.RESPONSE_CANCEL:
+		with open(dir_trabajo + '/data.ms', 'wb') as f:
+				pickle.dump(datos, f)
+	else: message_stop()		
+
+def saveas_mesh(signal):
+	if not nodolist.run:
+		dialog = gtk.FileChooserDialog("Select or create a mesh file",
+			None,
+			gtk.FILE_CHOOSER_ACTION_SAVE,
+			(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+			gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+		response = dialog.run()
+		if response == gtk.RESPONSE_OK:
+			file_path = dialog.get_filename()    
+			datos =nodolist,link_color24,link_color50
+			with open(file_path, 'wb') as f:
+				pickle.dump(datos, f)
+			archivo_corriente = file_path
+		elif response == gtk.RESPONSE_CANCEL:
+			dialog.destroy()
 		dialog.destroy()
-	dialog.destroy()
+	else: message_stop()
 
 def select_folder(signal):
 	global dir_trabajo
@@ -400,7 +394,6 @@ def dibujar(widget):
 				cr.move_to(i*100,30)
 				cr.show_text(p +': ' + str(l.prop[p]))
 				i+=1
-		
 		else: 
 			cr.set_source_rgba(0.8, 0.4, 0.6,1.0) 
 			cr.set_line_width (1.0)
@@ -419,7 +412,6 @@ def dibujar(widget):
 				cr.move_to(i*100,45)
 				cr.show_text(p +': ' + str(l.prop[p]))
 				i+=1
-		
 		else: 
 			cr.set_source_rgba(0.4, 0.8, 0.6,1.0) 
 			cr.set_line_width (1.0)
@@ -463,6 +455,7 @@ def dibujar(widget):
 		cr.move_to(p[0]-30,p[1]-15)
 		cr.show_text('Tx:'+str(po.bat0.rxtx_packets()[0]))
 	cr.stroke()
+
 # Redraw the screen from the backing pixmap
 def expose_event(widget, event):
     dibujar(widget)  
@@ -884,7 +877,7 @@ class MenuApp(gtk.Window):
 		self.connect("destroy", gtk.main_quit)
 
 		self.show_all()
-		gobject.timeout_add( 1000, self.tick )
+		gobject.timeout_add( 2000, self.tick )
 		global password
 		password = getPassword()
 		global dir_trabajo
