@@ -123,7 +123,7 @@ class nodoClass(object):
 			os.system('echo ' +password+' | sudo -S rm -rf /tmp/c50GHz' + self.octet_str)
 			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapc24GHz' +self.octet_str)
 			os.system('echo ' +password+' | sudo -S ip link delete tapc24GHz' +self.octet_str)
-			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapc50GHz' +self.octet_str)
+			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/50 dev tapc50GHz' +self.octet_str)
 			os.system('echo ' +password+' | sudo -S ip link delete tapc50GHz' +self.octet_str)
 			os.system('VBoxManage controlvm num' + self.octet_str + ' poweroff')
 			time.sleep(1)
@@ -214,20 +214,22 @@ def near(punto):
 
 def open_mesh(widget):
 	global link_color24,link_color50,nodolist
-	dialog = gtk.FileChooserDialog("Select a mesh file",
-		None,
-		gtk.FILE_CHOOSER_ACTION_OPEN,
-		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-		gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-	response = dialog.run()
-	if response == gtk.RESPONSE_OK:
-		file_path = dialog.get_filename()    
-		with open(file_path, 'rb') as f:
-			nodolist,link_color24,link_color50 = pickle.load(f)
-		archivo_corriente = file_path
-	elif response == gtk.RESPONSE_CANCEL:
+	if not nodolist.run:
+		dialog = gtk.FileChooserDialog("Select a mesh file",
+			None,
+			gtk.FILE_CHOOSER_ACTION_OPEN,
+			(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+			gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+		response = dialog.run()
+		if response == gtk.RESPONSE_OK:
+			file_path = dialog.get_filename()    
+			with open(file_path, 'rb') as f:
+				nodolist,link_color24,link_color50 = pickle.load(f)
+			archivo_corriente = file_path
+		elif response == gtk.RESPONSE_CANCEL:
+			dialog.destroy()
 		dialog.destroy()
-	dialog.destroy()
+	else: message_stop()
 
 def message_stop():
 	md = gtk.MessageDialog(None, 
@@ -264,18 +266,19 @@ def saveas_mesh(signal):
 
 def select_folder(signal):
 	global dir_trabajo
-	dialog = gtk.FileChooserDialog("Select work directory",
-		None,
-		gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-		gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-	response = dialog.run()
-	if response == gtk.RESPONSE_OK:
-		dir_trabajo = dialog.get_filename()
-	elif response == gtk.RESPONSE_CANCEL:
+	if not nodolist.run:
+		dialog = gtk.FileChooserDialog("Select work directory",
+			None,
+			gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+			(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+			gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+		response = dialog.run()
+		if response == gtk.RESPONSE_OK:
+			dir_trabajo = dialog.get_filename()
+		elif response == gtk.RESPONSE_CANCEL:
+			dialog.destroy()
 		dialog.destroy()
-	dialog.destroy()
-
+	else: message_stop()
 
    
 def responseToDialog(entry, dialog, response):
@@ -331,6 +334,7 @@ def delete_mesh(signal):
 			link_color50.remove(x)
 		for x  in nodolist[:]:
 			nodolist.remove(x)
+	else: message_stop()
 
 
 def remover_nodos(signal):
