@@ -123,7 +123,7 @@ class nodoClass(object):
 			os.system('echo ' +password+' | sudo -S rm -rf /tmp/c50GHz' + self.octet_str)
 			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapc24GHz' +self.octet_str)
 			os.system('echo ' +password+' | sudo -S ip link delete tapc24GHz' +self.octet_str)
-			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/50 dev tapc50GHz' +self.octet_str)
+			os.system('echo ' +password+' | sudo -S ip addr del '+ self.tapwrt.ip +'/24 dev tapc50GHz' +self.octet_str)
 			os.system('echo ' +password+' | sudo -S ip link delete tapc50GHz' +self.octet_str)
 			os.system('VBoxManage controlvm num' + self.octet_str + ' poweroff')
 			time.sleep(1)
@@ -736,7 +736,6 @@ def create_colorfull(dir_trabajo):
 	f.write('port/create 5\n')
 	f.write('port/setcolour 1 1\n')
 	f.write('port/setcolour 2 2\n')
-	f.write('port/setcolour 3 2\n')
 	f.close()
 
 class MenuApp(gtk.Window):
