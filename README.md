@@ -36,13 +36,13 @@ Read the wiki Emulator Manual.
 
 ####Example.
 
-In this example one can view four networks of nine nodes each one with links in 2.4 GHz band and connected the four network with links of 5.0 GHz Band.
+In this example one can view five networks of nine nodes each one with links in 2.4 GHz band and connected the five network with links of 5.0 GHz Band.
 
 ![Example](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/example.png "Example")
 
-In the bottom of the screen there are the originators list for the node number 45.
+In the right  of the screen there are the originators and next hope list for the node number 66.
 
-In the next figure is shown the node 59 making a ping to node number 71, the times are good.
+In the next figure is shown the node 66 making a ping to node number 11, the times are good.
 
 ![Ping](https://github.com/dbritos/Network-mesh-emulator/blob/master/figures/ping.png "ping")
 
