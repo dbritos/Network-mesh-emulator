@@ -80,11 +80,11 @@ class interface(object):
 			port = self.ind
 			host = self.oamip
 			mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11.' + str(port))
-			rx = netsnmp.snmpget(mibr, Version = 1, DestHost = host,Community='public',
-				Timeout=5000,Retries=0)
+			rx = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',
+				Timeout=10000,Retries=3)
 			mibt=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17.' + str(port))
-			tx = netsnmp.snmpget(mibt, Version = 1, DestHost = host,Community='public',
-				Timeout=5000,Retries=0)
+			tx = netsnmp.snmpget(mibt, Version = 2, DestHost = host,Community='public',
+				Timeout=10000,Retries=3)
 			if rx[0] is None:rx =['0','0']
 			if tx[0] is None:tx =['0','0']  
 			return(rx[0],tx[0])
@@ -107,7 +107,7 @@ class nodoClass(object):
 		self.eth2 = interface(4,'eth2',str(self),self.smp_ip)
 		self.bat0=  interface(5,'bat0',str(self),self.smp_ip)		
 		self.interfases =[self.tapwrt,self.oam,self.lo,self.eth0,self.eth1,self.eth2,self.bat0]
-		self.originator = self.getoriginators()
+		self.originator_nexthope = ['None'],['None']
 		self.vm = v_name_base
 		self.running = False
 
@@ -133,11 +133,12 @@ class nodoClass(object):
 
 
     
-	def getoriginators(self):
+	def get_originators_nexthope(self):
 		host= self.smp_ip
-		mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.1.101.1')
-		orig = netsnmp.snmpget(mibr, Version = 1, DestHost = host,Community='public',Timeout=5000,Retries=0)
-		return str(orig[0]).split()	    
+		mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.2.101.1')
+		orig = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',Timeout=10000,Retries=3)
+		on = str(orig[0]).split()	
+		return on[::2],on[1::2]	    
 	
 	def start(self):
 		if not self.running:
@@ -377,20 +378,18 @@ def dibujar(widget):
 	#Draw bacground grid
 	cr.set_line_width(1)
 	cr.set_source_rgba(0.1, 0.1, 0.1,1.0)
-	for i in range(11):
+	for i in range(10):
 		cr.move_to(i*100, 0)
 		cr.line_to(i*100, 1000)
 	for i in range(11):
 		cr.move_to(0,i*100)
-		cr.line_to(1000,i*100)
+		cr.line_to(900,i*100)
 	cr.stroke()
 	#Draw wire
 	cr.select_font_face('Sans')
 	cr.set_font_size(12)
 	for l in link_color24:
 		if l.sd in link_color24.current_wire:
-			cr.set_source_rgba(1.0, 1.0, 1.0,1.0) 
-			cr.set_line_width (4.0)
 			#Draw wire property for current wire
 			cr.set_source_rgba(0.8, 0.4, 0.6,1.0)  
 			i=0
@@ -398,17 +397,17 @@ def dibujar(widget):
 				cr.move_to(i*100,30)
 				cr.show_text(p +': ' + str(l.prop[p]))
 				i+=1
+			cr.set_source_rgba(0.8, 0.4, 0.6,0.5) 
+			cr.set_line_width (4.0)
 		else: 
-			cr.set_source_rgba(0.8, 0.4, 0.6,1.0) 
-			cr.set_line_width (1.0)
+			cr.set_source_rgba(0.8, 0.4, 0.6,0.5) 
+			cr.set_line_width (2.0)
 		(xi,yi),(xf,yf) = l.sd
 		cr.move_to(xi,yi)
 		cr.line_to(xf,yf)
 		cr.stroke() 
 	for l in link_color50:
 		if l.sd in link_color50.current_wire:
-			cr.set_source_rgba(1.0, 1.0, 1.0,1.0) 
-			cr.set_line_width (4.0)
 			#Draw wire property for current wire
 			cr.set_source_rgba(0.4, 0.8, 0.6,1.0) 
 			i=0
@@ -416,9 +415,11 @@ def dibujar(widget):
 				cr.move_to(i*100,45)
 				cr.show_text(p +': ' + str(l.prop[p]))
 				i+=1
+			cr.set_source_rgba(0.4, 0.8, 0.6,0.5) 
+			cr.set_line_width (4.0)
 		else: 
-			cr.set_source_rgba(0.4, 0.8, 0.6,1.0) 
-			cr.set_line_width (1.0)
+			cr.set_source_rgba(0.4, 0.8, 0.6,0.5) 
+			cr.set_line_width (2.0)
 		(xi,yi),(xf,yf) = l.sd
 		cr.move_to(xi,yi)
 		cr.line_to(xf,yf)
@@ -428,23 +429,35 @@ def dibujar(widget):
 		p = po.pos
 		cr.arc(p[0],p[1], 12, 0, 2*math.pi)
 		if po.pos == nodolist.current.pos:
-			cr.set_source_rgba(1.0, 0.0, 1.0,1.0) 
 			#Draw originators for curren nodo
-			o = po.getoriginators()
-			if o != ['None']:po.originator = o
-			for i in range(len(po.originator)):
-				cr.move_to(125*(i%8),920+(i//8)*15)
-				cr.show_text(str(po.originator[i]))
+			if nodolist.run:
+				cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
+				cr.move_to(950,15)
+				cr.show_text("Originators")
+				cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
+				cr.move_to(950+125,15)
+				cr.show_text("Next Hope")
+				o,n = po.get_originators_nexthope()
+				rg =len(o)
+				if rg > len(n):rg = len(n)
+				for i in range(rg):
+					cr.set_source_rgba(1.0, 0.0, 1.0,1.0)
+					cr.move_to(950,40+i*15)
+					cr.show_text(str(o[i]))
+					cr.set_source_rgba(0.0, 1.0, 1.0,1.0)
+					cr.move_to(950+125,40+i*15)
+					cr.show_text(str(n[i]))
 			#Drow Interface packets for curren nodo
-			cr.set_source_rgba(0.0, 1.0, 0.0,1.0) # green
-			for i in po.interfases:
-				if i.ind:
-					r,t = i.rxtx_packets()
-					cr.move_to(200*(i.ind-1),15)
-					cr.show_text(i.name+' rx: '+r+' tx: '+t)
-			cr.move_to(1,60)
-			cr.show_text('vm: ' + po.vm)
-			cr.set_source_rgba(0.3, 1.0, 0.3,1.0) 
+				cr.set_source_rgba(0.0, 1.0, 0.0,1.0) # green
+				if nodolist.run:
+					for i in po.interfases:
+						if i.ind:
+							r,t = i.rxtx_packets()
+							cr.move_to(200*(i.ind-1),15)
+							cr.show_text(i.name+' rx: '+r+' tx: '+t)
+					cr.move_to(1,60)
+					cr.show_text('vm: ' + po.vm)
+					cr.set_source_rgba(0.3, 1.0, 0.3,1.0) 
 		else:
 			cr.set_source_rgba(0.1,0.6, 0.1,1.0) 
 		cr.fill()
@@ -455,9 +468,10 @@ def dibujar(widget):
 		cr.show_text(str(po))
 		cr.move_to(p[0]-30,p[1]-30)
 		cr.set_source_rgb(0.0, 1.0, 0.1)
-		cr.show_text('Rx:'+str(po.bat0.rxtx_packets()[0]))
-		cr.move_to(p[0]-30,p[1]-15)
-		cr.show_text('Tx:'+str(po.bat0.rxtx_packets()[0]))
+		if nodolist.run:
+			cr.show_text('Rx:'+str(po.bat0.rxtx_packets()[0]))
+			cr.move_to(p[0]-30,p[1]-15)
+			cr.show_text('Tx:'+str(po.bat0.rxtx_packets()[0]))
 	cr.stroke()
 
 # Redraw the screen from the backing pixmap
@@ -518,11 +532,12 @@ def button_release_event(widget, event):
 
 		elif event.button == 3 and cr != None:
 			if inicio==fin:
-				if any(x.pos==inicio for x in nodolist):
-					for x in nodolist:
-						if x.pos==inicio:
-							nid=nodolist.index(x)
-							i = nodolist.pop(nid)
+				if not nodolist.run: 
+					if any(x.pos==inicio for x in nodolist):
+						for x in nodolist:
+							if x.pos==inicio:
+								nid=nodolist.index(x)
+								i = nodolist.pop(nid)
 			elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
 				if wire_prop['channel'] == 'c24GHz':
 					for x in link_color24:
@@ -742,7 +757,7 @@ class MenuApp(gtk.Window):
 	def __init__(self):
 		super(MenuApp, self).__init__()
 		self.set_title("Mesh network emulator")
-		self.set_size_request(1001, 1100)
+		self.set_size_request(1201, 1001)
 		self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(6400, 6400, 6440))
 		self.set_position(gtk.WIN_POS_CENTER)
         # top level menu bar
@@ -880,7 +895,7 @@ class MenuApp(gtk.Window):
 		self.connect("destroy", gtk.main_quit)
 
 		self.show_all()
-		gobject.timeout_add( 2000, self.tick )
+		gobject.timeout_add( 1000, self.tick )
 		global password
 		password = getPassword()
 		global dir_trabajo
