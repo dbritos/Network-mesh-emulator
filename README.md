@@ -25,9 +25,9 @@ This is a network Mesh emulator with batman-adv. Is written in python and work w
 
 1. Install all of the necessary Python modules listed above. Many of them are available via pip and/or apt-get.
 2. Install Virtualbox.
-3. Configure OpenWrt virtual machine.
-4. Install VirtualBox
-5. Install vde_switch with the patch.
+3. Add a Host-only Network (vboxnet0) in Virtualbox -> Preferences -> Network 
+4. Install vde_switch with the patch.
+5. Import the provided OpenWrt virtual machine (openwrt.ova).
 6. Run the program $>python simmeshv11.py
 
 ####Basic usage
