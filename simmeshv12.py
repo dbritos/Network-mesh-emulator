@@ -72,9 +72,9 @@ class interface(object):
 		self.ifpresent = False
 		self.ip ={'tapwrt':'192.168.' + nodonum + '.1','oam':'192.168.100.' + nodonum,
 			'lo':None,'eth0':'192.168.100.' + nodonum,'eth1':None,'eth2':None,'bat0':'192.168.7.' + nodonum,}[name]
-		self.mac ={'tapwrt':None,'oam':None,'lo':None,'eth0':'8001000007' + nodonum,
-			'eth1':'8002000007' +  nodonum,'eth2':'8005000007' + nodonum,
-			'bat0':'90' + nodonum + nodonum + nodonum + nodonum +nodonum}[name]
+		self.mac ={'tapwrt':None,'oam':None,'lo':None,'eth0':'80:01:00:00:07:' + nodonum,
+			'eth1':'80:02:00:00:07:' +  nodonum,'eth2':'80:05:00:00:07:' + nodonum,
+			'bat0':'90:' + nodonum +':'+ nodonum +':' + nodonum +':' + nodonum +':' + nodonum}[name]
 
 	def rxtx_packets(self):
 		if self.ind:
@@ -151,9 +151,9 @@ class nodoClass(object):
 			os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapc24GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
 			os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapc50GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
 			os.system('VBoxManage clonevm ' + self.vm + ' --name num'+self.octet_str+' --register')
-			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + self.eth0.mac)
-			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + self.eth1.mac)
-			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + self.eth2.mac)
+			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' +str(self.eth0.mac).translate(None,':'))
+			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
+			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
 			os.system('VBoxManage startvm num'+ self.octet_str ) # + '--type headless'
 			self.running = True
 
@@ -393,7 +393,9 @@ def dibujar(widget):
 	cr.select_font_face('Sans')
 	cr.set_font_size(12)
 	for l in link_color24:
-		if l.sd in link_color24.current_wire:
+		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
+			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
+		elif l.sd in link_color24.current_wire:
 			#Draw wire property for current wire
 			cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
 			i=0
@@ -411,7 +413,9 @@ def dibujar(widget):
 		cr.line_to(xf,yf)
 		cr.stroke()
 	for l in link_color50:
-		if l.sd in link_color50.current_wire:
+		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
+			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
+		elif l.sd in link_color50.current_wire:
 			#Draw wire property for current wire
 			cr.set_source_rgba(0.0, 1.0, 0.0,1.0)
 			i=0
@@ -463,9 +467,8 @@ def dibujar(widget):
 					cr.show_text('vm: ' + po.vm)
 					cr.set_source_rgba(0.3, 1.0, 0.3,1.0)
 		else:
-			print str(po), node_tr
-			if trace_l2 and str(po) in node_tr:cr.set_source_rgba(1.0,1.0, 1.0,0.5)
-			else:cr.set_source_rgba(0.1,0.6, 0.1,1.0)
+			cr.set_source_rgba(0.1,0.6, 0.1,1.0)
+		if trace_l2 and str(po) in node_tr:cr.set_source_rgba(1.0,1.0, 1.0,0.5)
 		cr.fill()
 		cr.stroke()
 		#Draw bat0 packets for each nodo
@@ -505,17 +508,20 @@ def button_release_event(widget, event):
 				if nodolist.run and trace_l2:
 					for x in nodolist:
 						if x.pos==fin:
-							trace_fin_mac = ':'.join(s.encode('hex') for s in str(x.bat0.mac).decode('hex'))
+							trace_fin_mac = str(x.bat0.mac)
 						if x.pos==inicio:
 							trace_nicio_ip = str(x.eth0.ip)
+							pos_ini = str(x)
 					l = []
+					print trace_fin_mac
 					mibr=netsnmp.Varbind('iso','3.6.1.4.1.32.1.4',trace_fin_mac,'OCTETSTR')
-					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000,Retries=3)
+					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=1000000,Retries=3)
 					mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
-					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=100000,Retries=3)
+					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=1000000,Retries=3)
 					for i in str(orig[0]).split():
 						l.append(i.split(':')[-1:])
-						node_tr = reduce(lambda x,y: x+y,l)
+					node_tr = reduce(lambda x,y: x+y,l)
+					node_tr.append(pos_ini)
 				else:
 					link_color24.current_wire = [(inicio,fin),(fin,inicio)]
 					link_color50.current_wire = [(inicio,fin),(fin,inicio)]

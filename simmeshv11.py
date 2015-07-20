@@ -107,7 +107,7 @@ class nodoClass(object):
 		self.eth2 = interface(4,'eth2',str(self),self.smp_ip)
 		self.bat0=  interface(5,'bat0',str(self),self.smp_ip)		
 		self.interfases =[self.tapwrt,self.oam,self.lo,self.eth0,self.eth1,self.eth2,self.bat0]
-		self.originator_nexthope = ['None'],['None']
+		self.originator_nexthop = ['None'],['None']
 		self.vm = v_name_base
 		self.running = False
 
@@ -133,7 +133,7 @@ class nodoClass(object):
 
 
     
-	def get_originators_nexthope(self):
+	def get_originators_nexthop(self):
 		host= self.smp_ip
 		mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.2.101.1')
 		orig = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',Timeout=10000,Retries=3)
@@ -436,8 +436,8 @@ def dibujar(widget):
 				cr.show_text("Originators")
 				cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
 				cr.move_to(950+125,15)
-				cr.show_text("Next Hope")
-				o,n = po.get_originators_nexthope()
+				cr.show_text("Next Hop")
+				o,n = po.get_originators_nexthop()
 				rg =len(o)
 				if rg > len(n):rg = len(n)
 				for i in range(rg):
