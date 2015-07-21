@@ -82,10 +82,10 @@ class interface(object):
 			host = self.oamip
 			mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11.' + str(port))
 			rx = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',
-				Timeout=10000,Retries=3)
+				Timeout=50000,Retries=3)
 			mibt=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17.' + str(port))
 			tx = netsnmp.snmpget(mibt, Version = 2, DestHost = host,Community='public',
-				Timeout=10000,Retries=3)
+				Timeout=50000,Retries=3)
 			if rx[0] is None:rx =['0','0']
 			if tx[0] is None:tx =['0','0']
 			return(rx[0],tx[0])
@@ -137,7 +137,7 @@ class nodoClass(object):
 	def get_originators_nexthop(self):
 		host= self.smp_ip
 		mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.2.101.1')
-		orig = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',Timeout=10000,Retries=3)
+		orig = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',Timeout=50000,Retries=3)
 		on = str(orig[0]).split()
 		return on[::2],on[1::2]
 
@@ -515,9 +515,9 @@ def button_release_event(widget, event):
 							pos_ini = str(x)
 					l = []
 					mibr=netsnmp.Varbind('iso','3.6.1.4.1.32.1.4',trace_fin_mac,'OCTETSTR')
-					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=5000000,Retries=3)
+					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=3)
 					mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
-					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=5000000,Retries=3)
+					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=3)
 					for i in str(orig[0]).split():
 						l.append(i.split(':')[-1:])
 					node_tr = reduce(lambda x,y: x+y,l)
