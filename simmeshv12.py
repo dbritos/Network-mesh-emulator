@@ -197,7 +197,8 @@ class wireClass(object):
 		self.running = False
 
 def traceon(signal):
-    global trace_l2
+    global trace_l2, node_tr
+    node_tr = []
     if signal.active:
         trace_l2 = True
     else:
@@ -393,9 +394,7 @@ def dibujar(widget):
 	cr.select_font_face('Sans')
 	cr.set_font_size(12)
 	for l in link_color24:
-		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
-			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
-		elif l.sd in link_color24.current_wire:
+		if l.sd in link_color24.current_wire:
 			#Draw wire property for current wire
 			cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
 			i=0
@@ -408,14 +407,14 @@ def dibujar(widget):
 		else:
 			cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
 			cr.set_line_width (2.0)
+		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
+			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
 		(xi,yi),(xf,yf) = l.sd
 		cr.move_to(xi,yi)
 		cr.line_to(xf,yf)
 		cr.stroke()
 	for l in link_color50:
-		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
-			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
-		elif l.sd in link_color50.current_wire:
+		if l.sd in link_color50.current_wire:
 			#Draw wire property for current wire
 			cr.set_source_rgba(0.0, 1.0, 0.0,1.0)
 			i=0
@@ -428,6 +427,8 @@ def dibujar(widget):
 		else:
 			cr.set_source_rgba(0.0, 1.0, 0.0,0.4)
 			cr.set_line_width (2.0)
+		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
+			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
 		(xi,yi),(xf,yf) = l.sd
 		cr.move_to(xi,yi)
 		cr.line_to(xf,yf)
@@ -501,7 +502,7 @@ def button_release_event(widget, event):
 	if fin[0] < 950 and fin[0] > 50 and fin[1] < 950 and fin[1] > 50:
 		if event.button == 1 and cr != None:
 			if inicio==fin:
-				if not any(x.pos==inicio for x in nodolist):
+				if not nodolist.run and not any(x.pos==inicio for x in nodolist):
 					nodolist.append(nodoClass(inicio))
 					nodolist.set_cur_pos(inicio)
 			elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
@@ -513,11 +514,10 @@ def button_release_event(widget, event):
 							trace_nicio_ip = str(x.eth0.ip)
 							pos_ini = str(x)
 					l = []
-					print trace_fin_mac
 					mibr=netsnmp.Varbind('iso','3.6.1.4.1.32.1.4',trace_fin_mac,'OCTETSTR')
-					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=1000000,Retries=3)
+					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=5000000,Retries=3)
 					mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
-					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=1000000,Retries=3)
+					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=5000000,Retries=3)
 					for i in str(orig[0]).split():
 						l.append(i.split(':')[-1:])
 					node_tr = reduce(lambda x,y: x+y,l)
