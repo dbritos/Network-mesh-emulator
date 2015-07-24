@@ -17,7 +17,7 @@ password = ''
 v_name_base = 'openwrtpass'
 trace_l2 = False
 node_tr = []
-
+node_head = ''
 
 class LinkList(list):
 	def __init__(self):
@@ -154,7 +154,7 @@ class nodoClass(object):
 			os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' +str(self.eth0.mac).translate(None,':'))
 			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
 			os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
-			os.system('VBoxManage startvm num'+ self.octet_str ) # + '--type headless'
+			os.system('VBoxManage startvm num'+ self.octet_str  + node_head) # + '--type headless'
 			self.running = True
 
 class wireClass(object):
@@ -204,6 +204,14 @@ def traceon(signal):
     else:
         trace_l2 = False
  
+def headon(signal):
+    global node_head
+    if signal.active:
+        node_head = ' --type headless'
+    else:
+        node_head = ''
+ 
+
 def point2num(point):
     return int((point[0] // 100)*10 + point[1]//100)
 
@@ -483,6 +491,26 @@ def dibujar(widget):
 			cr.move_to(p[0]-30,p[1]-15)
 			cr.show_text('Tx:'+str(po.bat0.rxtx_packets()[0]))
 	cr.stroke()
+	if trace_l2:
+		x = -60
+		y = 950
+		cr.set_line_width (1.0)
+		for i in node_tr:
+			if len(i) == 2:
+				x = x + 80
+				if x > 900:
+					x = 20
+					y = 975
+				cr.set_source_rgba(0.0, 1.0, 0.0,1.0)
+				cr.move_to(x+12,y)
+				cr.arc(x,y, 12, 0, 2*math.pi)
+				cr.move_to(x-7,y+5)
+				cr.show_text(i)
+			else:
+				cr.set_source_rgba(1.0, 1.0, 0.0,1.0)
+				cr.move_to(x+14,y+5)
+				cr.show_text(i)
+	cr.stroke()
 
 # Redraw the screen from the backing pixmap
 def expose_event(widget, event):
@@ -515,13 +543,13 @@ def button_release_event(widget, event):
 							pos_ini = str(x)
 					l = []
 					mibr=netsnmp.Varbind('iso','3.6.1.4.1.32.1.4',trace_fin_mac,'OCTETSTR')
-					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=3)
+					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=50000000,Retries=3)
 					mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
 					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=3)
 					for i in str(orig[0]).split():
 						l.append(i.split(':')[-1:])
 					node_tr = reduce(lambda x,y: x+y,l)
-					node_tr.append(pos_ini)
+					node_tr.insert(0,pos_ini)
 				else:
 					link_color24.current_wire = [(inicio,fin),(fin,inicio)]
 					link_color50.current_wire = [(inicio,fin),(fin,inicio)]
@@ -882,6 +910,11 @@ class MenuApp(gtk.Window):
 		trace.set_active(False)
 		toolsmenu.append(trace)
 		trace.connect("activate",traceon)
+		
+		head = gtk.CheckMenuItem("VM Headless on")
+		head.set_active(False)
+		toolsmenu.append(head)
+		head.connect("activate",headon)
 
         # append the top items
 		menubar.append(filem)
