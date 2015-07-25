@@ -506,10 +506,14 @@ def dibujar(widget):
 				cr.arc(x,y, 12, 0, 2*math.pi)
 				cr.move_to(x-7,y+5)
 				cr.show_text(i)
-			else:
+			elif '.' in i:
 				cr.set_source_rgba(1.0, 1.0, 0.0,1.0)
 				cr.move_to(x+14,y+5)
 				cr.show_text(i)
+			else:
+				cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
+				cr.move_to(x+14,y+5)
+				cr.show_text('too delay')
 	cr.stroke()
 
 # Redraw the screen from the backing pixmap
