@@ -330,6 +330,7 @@ def run_mesh(signal):
 
 
 def stop_mesh(signal):
+	global node_tr
 	if nodolist.run:
 		link_color24.stop()
 		link_color50.stop()
@@ -338,7 +339,7 @@ def stop_mesh(signal):
 		os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
 		os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
 		nodolist.run = False
-
+		node_tr = []
 def delete_mesh(signal):
 	if not nodolist.run:
 		print 'borrando'

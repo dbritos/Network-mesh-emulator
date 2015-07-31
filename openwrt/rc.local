@@ -1,0 +1,18 @@
+#!/bin/sh
+# kill default openwrt network config
+RED=$(ifconfig eth1 | sed '1,1!d' | sed 's/.*HWaddr //'| sed 's/.\{11\}://'| sed 's/.\{5\}$//')
+NUM=$(ifconfig eth1 | sed '1,1!d' | sed 's/.*HWaddr //'| sed 's/.*://'| sed 's/[\n\ ].*//')
+ifconfig br-lan down
+brctl delbr br-lan
+ip link delete eth0
+ip addr add 192.168.100.$NUM/24 dev eth0
+ip link set dev eth1 mtu 1500 up
+ip link set dev eth2 mtu 1500 up
+batctl -m bat0 interface add eth1
+batctl -m bat0 interface add eth2
+ip addr add 192.168.$RED.$NUM/24 dev bat0
+ip link set dev bat0 address 90:$NUM:$NUM:$NUM:$NUM:$NUM
+ip link set dev bat0 up
+batctl -m bat0 originators
+/etc/init.d/snmpd enable      
+/etc/init.d/snmpd restart
