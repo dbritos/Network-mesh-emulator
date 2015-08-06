@@ -18,7 +18,8 @@ v_name_base = 'openwrtpass'
 trace_l2 = False
 node_tr = []
 node_head = ''
-
+o = []
+n = []
 class LinkList(list):
 	def __init__(self):
 		self.ll = []
@@ -55,10 +56,12 @@ class NodoList(list):
 	def stop(self):
 		for x in self:
 			x.stop()
+		self.run = False
 
 	def start(self):
 		for x in self:
 			x.start()
+		self.run = True
 
 link_color24 = LinkList()
 link_color50 = LinkList()
@@ -70,25 +73,13 @@ class interface(object):
 		self.name = name
 		self.oamip = oamip
 		self.ifpresent = False
+		self.rx = '0'
+		self.tx = '0'
 		self.ip ={'tapwrt':'192.168.' + nodonum + '.1','oam':'192.168.100.' + nodonum,
 			'lo':None,'eth0':'192.168.100.' + nodonum,'eth1':None,'eth2':None,'bat0':'192.168.7.' + nodonum,}[name]
 		self.mac ={'tapwrt':None,'oam':None,'lo':None,'eth0':'80:01:00:00:07:' + nodonum,
 			'eth1':'80:02:00:00:07:' +  nodonum,'eth2':'80:05:00:00:07:' + nodonum,
 			'bat0':'90:' + nodonum +':'+ nodonum +':' + nodonum +':' + nodonum +':' + nodonum}[name]
-
-	def rxtx_packets(self):
-		if self.ind:
-			port = self.ind
-			host = self.oamip
-			mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11.' + str(port))
-			rx = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',
-				Timeout=50000,Retries=3)
-			mibt=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17.' + str(port))
-			tx = netsnmp.snmpget(mibt, Version = 2, DestHost = host,Community='public',
-				Timeout=50000,Retries=3)
-			if rx[0] is None:rx =['0','0']
-			if tx[0] is None:tx =['0','0']
-			return(rx[0],tx[0])
 
 	def __str__(self):
 		return str(self.name)
@@ -110,6 +101,8 @@ class nodoClass(object):
 		self.interfases =[self.tapwrt,self.oam,self.lo,self.eth0,self.eth1,self.eth2,self.bat0]
 		self.originator_nexthop = ['None'],['None']
 		self.vm = v_name_base
+		self.load_average = '0.00'
+		self.count = 0 
 		self.running = False
 
 	def __str__(self):
@@ -136,7 +129,7 @@ class nodoClass(object):
 
 	def get_originators_nexthop(self):
 		host= self.smp_ip
-		mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.2.101.1')
+		mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.2')
 		orig = netsnmp.snmpget(mibr, Version = 2, DestHost = host,Community='public',Timeout=50000,Retries=3)
 		on = str(orig[0]).split()
 		return on[::2],on[1::2]
@@ -179,6 +172,7 @@ class wireClass(object):
 			link_color50.stop()
 			link_color24.start()
 			link_color50.start()
+			
 
 	def  start(self):
 		if not self.running:
@@ -326,7 +320,7 @@ def run_mesh(signal):
 		link_color24.start()
 		link_color50.start()
 		os.system('echo ' +password+' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
-		nodolist.run = True
+#		nodolist.run = True
 
 
 def stop_mesh(signal):
@@ -338,7 +332,7 @@ def stop_mesh(signal):
 		nodolist.stop()
 		os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
 		os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
-		nodolist.run = False
+#		nodolist.run = False
 		node_tr = []
 def delete_mesh(signal):
 	if not nodolist.run:
@@ -446,7 +440,38 @@ def dibujar(widget):
 	for po in nodolist:
 		p = po.pos
 		cr.arc(p[0],p[1], 12, 0, 2*math.pi)
+		cr.set_source_rgba(0.1,0.6, 0.1,1.0)
+		if nodolist.run:
+			if po.count == 0:
+				mibr=netsnmp.Varbind('iso.3.6.1.4.1.2021.10.1.3.1')
+				po.load_average = netsnmp.snmpget(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)[0]
+				if po.load_average == None:	po.count = 10
+
+				elif float(po.load_average) > 1:po.count = 10
+
+				else:
+					cr.set_source_rgba(0.1, 0.6, 0.1,1.0)
+					mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11')
+					rx = netsnmp.snmpwalk(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)
+					mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
+					tx = netsnmp.snmpwalk(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)
+					for i in po.interfases:
+						if i.ind:
+							if i.ind < len(rx):
+								i.rx = rx[i.ind-1]
+							else:
+								i.rx = '0'
+							if i.ind < len(tx):
+								i.tx = tx[i.ind-1]
+							else:
+								i.tx = '0'
+			else: 
+				po.count = po.count -1
+				cr.set_source_rgba(1.0, 0.0, 0.3,1.0)
 		if po.pos == nodolist.current.pos:
+			cr.set_source_rgba(1.0, 1.0, 0.0,1.0) # yellow
+			cr.move_to(1,60)
+			cr.show_text('vm: ' + po.vm)
 			#Draw originators for curren nodo
 			if nodolist.run:
 				cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
@@ -455,7 +480,7 @@ def dibujar(widget):
 				cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
 				cr.move_to(950+125,15)
 				cr.show_text("Next Hop")
-				o,n = po.get_originators_nexthop()
+#				o,n = po.get_originators_nexthop()
 				rg =len(o)
 				if rg > len(n):rg = len(n)
 				for i in range(rg):
@@ -466,18 +491,13 @@ def dibujar(widget):
 					cr.move_to(950+125,40+i*15)
 					cr.show_text(str(n[i]))
 			#Drow Interface packets for curren nodo
-				cr.set_source_rgba(1.0, 1.0, 0.0,1.0) # yellow
-				if nodolist.run:
-					for i in po.interfases:
-						if i.ind:
-							r,t = i.rxtx_packets()
-							cr.move_to(200*(i.ind-1),15)
-							cr.show_text(i.name+' rx: '+r+' tx: '+t)
-					cr.move_to(1,60)
-					cr.show_text('vm: ' + po.vm)
+				for i in po.interfases:
+					if i.ind:
+						cr.move_to(200*(i.ind-1),15)
+						cr.show_text(i.name+' rx: '+i.rx+' tx: '+i.tx)
 					cr.set_source_rgba(0.3, 1.0, 0.3,1.0)
-		else:
-			cr.set_source_rgba(0.1,0.6, 0.1,1.0)
+#		else:
+#			cr.set_source_rgba(0.1,0.6, 0.1,1.0)
 		if trace_l2 and str(po) in node_tr:cr.set_source_rgba(1.0,1.0, 1.0,0.5)
 		cr.fill()
 		cr.stroke()
@@ -485,12 +505,12 @@ def dibujar(widget):
 		cr.set_source_rgb(0.0, 0.0, 0.1)
 		cr.move_to(p[0]-7,p[1]+5)
 		cr.show_text(str(po))
-		cr.move_to(p[0]-30,p[1]-30)
-		cr.set_source_rgb(0.0, 1.0, 0.1)
 		if nodolist.run:
-			cr.show_text('Rx:'+str(po.bat0.rxtx_packets()[0]))
+			cr.move_to(p[0]-30,p[1]-30)
+			cr.set_source_rgb(0.0, 1.0, 0.1)
+			cr.show_text('Rx:'+str(po.bat0.rx))
 			cr.move_to(p[0]-30,p[1]-15)
-			cr.show_text('Tx:'+str(po.bat0.rxtx_packets()[0]))
+			cr.show_text('Tx:'+str(po.bat0.tx))
 	cr.stroke()
 	if trace_l2:
 		x = -60
@@ -519,8 +539,12 @@ def dibujar(widget):
 
 # Redraw the screen from the backing pixmap
 def expose_event(widget, event):
-    dibujar(widget)
-    return False
+	ti = time.time()
+	dibujar(widget)
+#	print gobject.main_depth()
+	tf =time.time()
+#	print tf-ti
+	return False
 
 
 def button_press_event(widget, event):
@@ -530,7 +554,7 @@ def button_press_event(widget, event):
 	return True
 
 def button_release_event(widget, event):
-	global wire_prop, trace_l2, node_tr
+	global wire_prop, trace_l2, node_tr,o,n
 	fin = near((event.x, event.y))
 	if fin[0] < 950 and fin[0] > 50 and fin[1] < 950 and fin[1] > 50:
 		if event.button == 1 and cr != None:
@@ -548,9 +572,9 @@ def button_release_event(widget, event):
 							pos_ini = str(x)
 					l = []
 					mibr=netsnmp.Varbind('iso','3.6.1.4.1.32.1.4',trace_fin_mac,'OCTETSTR')
-					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=50000000,Retries=3)
+					orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=1)
 					mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
-					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=3)
+					orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=1000000,Retries=1)
 					for i in str(orig[0]).split():
 						l.append(i.split(':')[-1:])
 					node_tr = reduce(lambda x,y: x+y,l)
@@ -574,6 +598,11 @@ def button_release_event(widget, event):
 			if inicio==fin:
 				if any(x.pos==inicio for x in nodolist):
 					nodolist.set_cur_pos(inicio)
+					if nodolist.run:
+						for x in nodolist:
+							if x.pos==fin:
+								o,n = x.get_originators_nexthop()
+								print o
 			else:
 				link_color24.current_wire = [(inicio,fin),(fin,inicio)]
 				if wire_prop['channel'] == 'c24GHz':
@@ -962,7 +991,8 @@ class MenuApp(gtk.Window):
 		self.connect("destroy", gtk.main_quit)
 
 		self.show_all()
-		gobject.timeout_add( 1000, self.tick )
+		gobject.timeout_add( 2000, self.tick )
+#		gobject.idle_add(self.tick )
 		global password
 		password = getPassword()
 		global dir_trabajo
