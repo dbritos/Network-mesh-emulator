@@ -399,16 +399,16 @@ def dibujar(widget):
 	for l in link_color24:
 		if l.sd in link_color24.current_wire:
 			#Draw wire property for current wire
-			cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
+			cr.set_source_rgba(0.0, 0.0, 1.0,1.0)  # blue
 			i=0
 			for p in l.prop:
 				cr.move_to(i*100,30)
 				cr.show_text(p +': ' + str(l.prop[p]))
 				i+=1
-			cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
+			cr.set_source_rgba(0.0, 0.0, 1.0,1.0)  # blue
 			cr.set_line_width (4.0)
-		else:
-			cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
+		else: 
+			cr.set_source_rgba(0.0, 0.0, 1.0,1.0)  # blue
 			cr.set_line_width (2.0)
 		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
 			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
@@ -419,16 +419,16 @@ def dibujar(widget):
 	for l in link_color50:
 		if l.sd in link_color50.current_wire:
 			#Draw wire property for current wire
-			cr.set_source_rgba(0.0, 1.0, 0.0,1.0)
+			cr.set_source_rgba(0.0, 1.0, 0.0,1.0)  #green
 			i=0
 			for p in l.prop:
 				cr.move_to(i*100,45)
 				cr.show_text(p +': ' + str(l.prop[p]))
 				i+=1
-			cr.set_source_rgba(0.0, 1.0, 0.0,0.4)
+			cr.set_source_rgba(0.0, 1.0, 0.0,0.5)  #green
 			cr.set_line_width (4.0)
 		else:
-			cr.set_source_rgba(0.0, 1.0, 0.0,0.4)
+			cr.set_source_rgba(0.0, 1.0, 0.0,0.5)  #green
 			cr.set_line_width (2.0)
 		if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
 			cr.set_source_rgba(1.0,1.0, 1.0,0.5)
@@ -445,7 +445,7 @@ def dibujar(widget):
 			if po.count == 0:
 				mibr=netsnmp.Varbind('iso.3.6.1.4.1.2021.10.1.3.1')
 				po.load_average = netsnmp.snmpget(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)[0]
-				if po.load_average == None:	po.count = 10
+				if po.load_average == None:	cr.set_source_rgba(0.6, 0.0, 0.0,1.0)
 
 				elif float(po.load_average) > 1:po.count = 10
 
@@ -602,7 +602,6 @@ def button_release_event(widget, event):
 						for x in nodolist:
 							if x.pos==fin:
 								o,n = x.get_originators_nexthop()
-								print o
 			else:
 				link_color24.current_wire = [(inicio,fin),(fin,inicio)]
 				if wire_prop['channel'] == 'c24GHz':
