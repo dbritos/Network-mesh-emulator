@@ -14,7 +14,7 @@ dir_trabajo = ''
 wire_prop ={'loss':0,'delay':0,'dup':0,'bandwith':0,'speed':0,
 				'capacity':0,'damage':0,'channel':'c24GHz'}
 password = ''
-v_name_base = 'openwrtpass'
+v_name_base = 'openwrtv12'
 trace_l2 = False
 node_tr = []
 node_head = ''
@@ -336,7 +336,6 @@ def stop_mesh(signal):
 		node_tr = []
 def delete_mesh(signal):
 	if not nodolist.run:
-		print 'borrando'
 		for x  in link_color24[:]:
 			link_color24.remove(x)
 		for x  in link_color50[:]:
@@ -446,9 +445,7 @@ def dibujar(widget):
 				mibr=netsnmp.Varbind('iso.3.6.1.4.1.2021.10.1.3.1')
 				po.load_average = netsnmp.snmpget(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)[0]
 				if po.load_average == None:	cr.set_source_rgba(0.6, 0.0, 0.0,1.0)
-
 				elif float(po.load_average) > 1:po.count = 10
-
 				else:
 					cr.set_source_rgba(0.1, 0.6, 0.1,1.0)
 					mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11')
@@ -484,10 +481,10 @@ def dibujar(widget):
 				rg =len(o)
 				if rg > len(n):rg = len(n)
 				for i in range(rg):
-					cr.set_source_rgba(1.0, 0.0, 1.0,1.0)
+					cr.set_source_rgba(0.0, 0.7, 0.7,1.0)
+					if i & 0x01 :cr.set_source_rgba(0.0, 1.0, 1.0,1.0)
 					cr.move_to(950,40+i*15)
 					cr.show_text(str(o[i]))
-					cr.set_source_rgba(0.0, 1.0, 1.0,1.0)
 					cr.move_to(950+125,40+i*15)
 					cr.show_text(str(n[i]))
 			#Drow Interface packets for curren nodo
@@ -541,7 +538,6 @@ def dibujar(widget):
 def expose_event(widget, event):
 	ti = time.time()
 	dibujar(widget)
-#	print gobject.main_depth()
 	tf =time.time()
 #	print tf-ti
 	return False
