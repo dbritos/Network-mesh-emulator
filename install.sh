@@ -1,13 +1,18 @@
 #!/bin/sh
-wget -c https://github.com/dbritos/Network-mesh-emulator/blob/master/openwrtv12.ova
-wget -c https://github.com/dbritos/Network-mesh-emulator/blob/master/simmeshv12.py
-wget https://github.com/dbritos/Network-mesh-emulator/blob/master/vde2-2.3.2-patch.tar
-sudo apt-get install virtualbox
+wget -c https://github.com/dbritos/Network-mesh-emulator/archive/master.zip
+unzip master.zip
+apt-get install libsdl1.2debian
+wget -c http://download.virtualbox.org/virtualbox/5.0.0/virtualbox-5.0_5.0.0-101573~Ubuntu~trusty_amd64.deb
+dpkg --install virtualbox-5.0_5.0.0-101573~Ubuntu~trusty_amd64.deb
+apt-get install snmp
+apt-get install libvdeplug2
+cd Network-mesh-emulator-master
 tar -xf vde2-2.3.2-patch.tar
 cd vde2-2.3.2-patch
-configure 
+./configure 
 make
 makeinstall
+cd ..
 apt-get install python2.7
 apt-get install python-gtk2-dev
 apt-get install python-gobject
