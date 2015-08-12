@@ -1,4 +1,4 @@
-#!/bin/sh
+make#!/bin/sh
 apt-get install libsdl1.2debian
 wget -c http://download.virtualbox.org/virtualbox/5.0.0/virtualbox-5.0_5.0.0-101573~Ubuntu~trusty_amd64.deb
 dpkg --install virtualbox-5.0_5.0.0-101573~Ubuntu~trusty_amd64.deb
@@ -7,7 +7,7 @@ tar -xf vde2-2.3.2-patch.tar
 cd vde2-2.3.2-patch
 ./configure 
 make
-makeinstall
+make install
 cd ..
 apt-get install libvdeplug2
 apt-get install python2.7
