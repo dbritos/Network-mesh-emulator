@@ -1,5 +1,4 @@
 #!/bin/sh
-unzip master.zip
 apt-get install libsdl1.2debian
 wget -c http://download.virtualbox.org/virtualbox/5.0.0/virtualbox-5.0_5.0.0-101573~Ubuntu~trusty_amd64.deb
 dpkg --install virtualbox-5.0_5.0.0-101573~Ubuntu~trusty_amd64.deb
