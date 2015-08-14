@@ -334,11 +334,11 @@ def response_to_dialog(entry, dialog, response):
 
 def get_password():
     dialog = gtk.MessageDialog(
-        None,
-        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-        gtk.MESSAGE_QUESTION,
-        gtk.BUTTONS_OK,
-        None)
+        parent=None,
+        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+        type=gtk.MESSAGE_QUESTION,
+        buttons=gtk.BUTTONS_OK,
+        message_format=None)
     dialog.set_markup('Please enter your <b>password</b>:')
     entry = gtk.Entry()
     entry.connect("activate", response_to_dialog, dialog, gtk.RESPONSE_OK)
@@ -348,6 +348,7 @@ def get_password():
     hbox.pack_end(entry)
     dialog.format_secondary_markup("This will be used for create interfaces in your local machine")
     dialog.vbox.pack_end(hbox, True, True, 0)
+    dialog.set_position(gtk.WIN_POS_CENTER)
     dialog.show_all()
     dialog.run()
     text = entry.get_text()
@@ -570,7 +571,7 @@ def dibujar(widget):
         for i in node_tr:
             if len(i) == 2:
                 x = x + 80
-                if x > 900:
+                if x > w -900:
                     x = 20
                     y = h - 25
                 cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)
