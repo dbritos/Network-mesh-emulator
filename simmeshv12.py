@@ -337,7 +337,7 @@ def run_mesh(signal):
         nodolist.start()
         link_color24.start()
         link_color50.start()
-        os.system('echo ' +password+' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
+        os.system('echo ' + password +' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
 #       nodolist.run = True
 
 
@@ -348,21 +348,22 @@ def stop_mesh(signal):
         link_color50.stop()
         os.system('killall -q vde_switch')
         nodolist.stop()
-        os.system('echo ' +password+' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
-        os.system('echo ' +password+' | sudo -S ip link set vboxnet0 down')
+        os.system('echo ' + password + ' | sudo -S ip addr del 192.168.100.1/24 dev vboxnet0')
+        os.system('echo ' + password + ' | sudo -S ip link set vboxnet0 down')
 #       nodolist.run = False
         node_tr = []
 
 
 def delete_mesh(signal):
     if not nodolist.run:
-        for x  in link_color24[:]:
+        for x in link_color24[:]:
             link_color24.remove(x)
-        for x  in link_color50[:]:
+        for x in link_color50[:]:
             link_color50.remove(x)
-        for x  in nodolist[:]:
+        for x in nodolist[:]:
             nodolist.remove(x)
-    else: message_stop()
+    else:
+        message_stop()
 
 
 def remover_nodos(signal):
@@ -373,20 +374,22 @@ def remover_nodos(signal):
     o5 = [(j[0]) for j in link]
     d5 = [(j[1]) for j in link]
     for i in nodolist[:]:
-        if (i.pos not in o and i.pos not in d) and (i.pos not in o5 and i.pos not in d5) :
+        if (i.pos not in o and i.pos not in d) and (i.pos not in o5 and i.pos not in d5):
             nodolist.remove(i)
 
 
 def remover_enlaces(signal):
     n = [(j.pos) for j in nodolist]
     for i in link_color24[:]:
-        linea= i.sd
-        ((x1,y1),(x2,y2))=linea
-        if (x1,y1) not  in n or (x2,y2) not in n: link_color24.remove(i)
+        linea = i.sd
+        ((x1, y1), (x2, y2)) = linea
+        if (x1, y1) not in n or (x2, y2) not in n:
+            link_color24.remove(i)
     for i in link_color50[:]:
-        linea= i.sd
-        ((x1,y1),(x2,y2))=linea
-        if (x1,y1) not  in n or (x2,y2) not in n: link_color50.remove(i)
+        linea = i.sd
+        ((x1, y1), (x2, y2)) = linea
+        if (x1, y1) not in n or (x2, y2) not in n:
+            link_color50.remove(i)
     if nodolist.run:
         link_color24.start()
         link_color50.start()
@@ -407,13 +410,13 @@ def dibujar(widget):
     cr.fill()
     # Draw background grid
     cr.set_line_width(1)
-    cr.set_source_rgba(0.1, 0.1, 0.1,1.0)
+    cr.set_source_rgba(0.1, 0.1, 0.1, 1.0)
     for i in range(10):
-        cr.move_to(i*100, 0)
-        cr.line_to(i*100, 1000)
+        cr.move_to(i * 100, 0)
+        cr.line_to(i * 100, 1000)
     for i in range(11):
-        cr.move_to(0,i*100)
-        cr.line_to(900,i*100)
+        cr.move_to(0, i * 100)
+        cr.line_to(900, i * 100)
     cr.stroke()
     # Draw wire
     cr.select_font_face('Sans')
@@ -421,59 +424,61 @@ def dibujar(widget):
     for l in link_color24:
         if l.sd in link_color24.current_wire:
             # Draw wire property for current wire
-            cr.set_source_rgba(0.0, 0.0, 1.0,1.0)  # blue
-            i=0
+            cr.set_source_rgba(0.0, 0.0, 1.0, 1.0)  # blue
+            i = 0
             for p in l.prop:
-                cr.move_to(i*100,30)
-                cr.show_text(p +': ' + str(l.prop[p]))
-                i+=1
-            cr.set_source_rgba(0.0, 0.0, 1.0,1.0)  # blue
-            cr.set_line_width (4.0)
+                cr.move_to(i * 100, 30)
+                cr.show_text(p + ': ' + str(l.prop[p]))
+                i += 1
+            cr.set_source_rgba(0.0, 0.0, 1.0, 1.0)  # blue
+            cr.set_line_width(4.0)
         else:
-            cr.set_source_rgba(0.0, 0.0, 1.0,1.0)  # blue
-            cr.set_line_width (2.0)
+            cr.set_source_rgba(0.0, 0.0, 1.0, 1.0)  # blue
+            cr.set_line_width(2.0)
         if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
-            cr.set_source_rgba(1.0,1.0, 1.0,0.5)
-        (xi,yi),(xf,yf) = l.sd
-        cr.move_to(xi,yi)
-        cr.line_to(xf,yf)
+            cr.set_source_rgba(1.0, 1.0, 1.0, 0.5)
+        (xi, yi), (xf, yf) = l.sd
+        cr.move_to(xi, yi)
+        cr.line_to(xf, yf)
         cr.stroke()
     for l in link_color50:
         if l.sd in link_color50.current_wire:
             # Draw wire property for current wire
-            cr.set_source_rgba(0.0, 1.0, 0.0,1.0)  #green
-            i=0
+            cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)  # green
+            i = 0
             for p in l.prop:
-                cr.move_to(i*100,45)
-                cr.show_text(p +': ' + str(l.prop[p]))
-                i+=1
-            cr.set_source_rgba(0.0, 1.0, 0.0,0.5)  #green
-            cr.set_line_width (4.0)
+                cr.move_to(i * 100, 45)
+                cr.show_text(p + ': ' + str(l.prop[p]))
+                i += 1
+            cr.set_source_rgba(0.0, 1.0, 0.0, 0.5)  # green
+            cr.set_line_width(4.0)
         else:
-            cr.set_source_rgba(0.0, 1.0, 0.0,0.5)  #green
-            cr.set_line_width (2.0)
+            cr.set_source_rgba(0.0, 1.0, 0.0, 0.5)  # green
+            cr.set_line_width(2.0)
         if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
-            cr.set_source_rgba(1.0,1.0, 1.0,0.5)
-        (xi,yi),(xf,yf) = l.sd
-        cr.move_to(xi,yi)
-        cr.line_to(xf,yf)
+            cr.set_source_rgba(1.0, 1.0, 1.0, 0.5)
+        (xi, yi), (xf, yf) = l.sd
+        cr.move_to(xi, yi)
+        cr.line_to(xf, yf)
         cr.stroke()
-    #Draw nodo
+    # Draw nodo
     for po in nodolist:
         p = po.pos
-        cr.arc(p[0],p[1], 12, 0, 2*math.pi)
-        cr.set_source_rgba(0.1,0.6, 0.1,1.0)
+        cr.arc(p[0], p[1], 12, 0, 2 * math.pi)
+        cr.set_source_rgba(0.1, 0.6, 0.1, 1.0)
         if nodolist.run:
             if po.count == 0:
-                mibr=netsnmp.Varbind('iso.3.6.1.4.1.2021.10.1.3.1')
-                po.load_average = netsnmp.snmpget(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)[0]
-                if po.load_average == None: cr.set_source_rgba(0.6, 0.0, 0.0,1.0)
-                elif float(po.load_average) > 1:po.count = 10
+                mibr = netsnmp.Varbind('iso.3.6.1.4.1.2021.10.1.3.1')
+                po.load_average = netsnmp.snmpget(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)[0]
+                if po.load_average is None:
+                    cr.set_source_rgba(0.6, 0.0, 0.0, 1.0)
+                elif float(po.load_average) > 1:
+                    po.count = 10
                 else:
                     cr.set_source_rgba(0.1, 0.6, 0.1,1.0)
-                    mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11')
+                    mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11')
                     rx = netsnmp.snmpwalk(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)
-                    mibr=netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
+                    mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
                     tx = netsnmp.snmpwalk(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)
                     for i in po.interfases:
                         if i.ind:
