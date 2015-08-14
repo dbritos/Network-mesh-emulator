@@ -197,7 +197,7 @@ class WireClass(object):
             if self.prop['loss'] != 0:
                 od = od + ' -l ' + str(self.prop['loss'])
             if self.prop['delay'] != 0:
-                od = od + ' -d ' + str(self.prop['delay']) + '+' + str(self.prop['delay'] / 2)+ 'N'
+                od = od + ' -d ' + str(self.prop['delay']) + '+' + str(self.prop['delay'] / 2) + 'N'
             if self.prop['dup'] != 0:
                 od = od + ' -D ' + str(self.prop['dup'])
             if self.prop['bandwith'] != 0:
@@ -328,11 +328,11 @@ def select_folder(signal):
         message_stop()
 
 
-def responseToDialog(entry, dialog, response):
+def response_to_dialog(entry, dialog, response):
     dialog.response(response)
 
 
-def getPassword():
+def get_password():
     dialog = gtk.MessageDialog(
         None,
         gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -341,7 +341,7 @@ def getPassword():
         None)
     dialog.set_markup('Please enter your <b>password</b>:')
     entry = gtk.Entry()
-    entry.connect("activate", responseToDialog, dialog, gtk.RESPONSE_OK)
+    entry.connect("activate", response_to_dialog, dialog, gtk.RESPONSE_OK)
     entry.set_visibility(False)
     hbox = gtk.HBox()
     hbox.pack_start(gtk.Label("Password:"), False, 5, 5)
@@ -360,7 +360,7 @@ def run_mesh(signal):
         nodolist.start()
         link_color24.start()
         link_color50.start()
-        os.system('echo ' + password +' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
+        os.system('echo ' + password + ' | sudo -S ifconfig vboxnet0 inet 192.168.100.1 up')
 #       nodolist.run = True
 
 
@@ -526,7 +526,7 @@ def dibujar(widget):
                 cr.move_to(950, 15)
                 cr.show_text("Originators")
                 cr.set_source_rgba(1.0, 1.0, 1.0, 1.0)
-                cr.move_to(950+ 125, 15)
+                cr.move_to(950 + 125, 15)
                 cr.show_text("Next Hop")
 #               o,n = po.get_originators_nexthop()
                 rg = len(o)
@@ -1053,7 +1053,7 @@ class MenuApp(gtk.Window):
         gobject.timeout_add(2000, self.tick)
 #       gobject.idle_add(self.tick )
         global password
-        password = getPassword()
+        password = get_password()
         global dir_trabajo
         dir_trabajo = os.getcwd()
         if not os.path.isfile('colourful.rc'):
