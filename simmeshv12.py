@@ -80,11 +80,20 @@ class interface(object):
         self.ifpresent = False
         self.rx = '0'
         self.tx = '0'
-        self.ip = {'tapwrt': '192.168.' + nodonum + '.1', 'oam': '192.168.100.' + nodonum,
-            'lo':None,'eth0':'192.168.100.' + nodonum,'eth1':None,'eth2':None,'bat0':'192.168.7.' + nodonum,}[name]
-        self.mac ={'tapwrt':None,'oam':None,'lo':None,'eth0':'80:01:00:00:07:' + nodonum,
-            'eth1':'80:02:00:00:07:' +  nodonum,'eth2':'80:05:00:00:07:' + nodonum,
-            'bat0':'90:' + nodonum +':'+ nodonum +':' + nodonum +':' + nodonum +':' + nodonum}[name]
+        self.ip = {'tapwrt': '192.168.' + nodonum + '.1',
+                   'oam': '192.168.100.' + nodonum,
+                   'lo': None,
+                   'eth0': '192.168.100.' + nodonum,
+                   'eth1':None,
+                   'eth2':None,
+                   'bat0':'192.168.7.' + nodonum, }[name]
+        self.mac = {'tapwrt': None, 
+                    'oam': None,
+                    'lo': None,
+                    'eth0': '80:01:00:00:07:' + nodonum,
+                    'eth1': '80:02:00:00:07:' + nodonum,
+                    'eth2': '80:05:00:00:07:' + nodonum,
+                    'bat0': '90:' + nodonum + ':' + nodonum + ':' + nodonum + ':' + nodonum + ':' + nodonum}[name]
 
     def __str__(self):
         return str(self.name)
@@ -104,7 +113,7 @@ class nodoClass(object):
         self.eth1 = interface(3, 'eth1', str(self), self.smp_ip)
         self.eth2 = interface(4, 'eth2', str(self), self.smp_ip)
         self.bat0 = interface(5, 'bat0', str(self), self.smp_ip)
-        self.interfases = [self.tapwrt,self.oam,self.lo,self.eth0,self.eth1,self.eth2,self.bat0]
+        self.interfases = [self.tapwrt, self.oam, self.lo, self.eth0, self.eth1, self.eth2, self.bat0]
         self.originator_nexthop = ['None'], ['None']
         self.vm = v_name_base
         self.load_average = '0.00'
@@ -127,7 +136,7 @@ class nodoClass(object):
             os.system('echo ' + password + ' | sudo -S ip link delete tapc50GHz' + self.octet_str)
             os.system('VBoxManage controlvm num' + self.octet_str + ' poweroff')
             time.sleep(1)
-            os.system('VBoxManage unregistervm --delete num' + self.octet_str )
+            os.system('VBoxManage unregistervm --delete num' + self.octet_str)
             os.system('killall -q vde_switch')
             self.running = False
 
@@ -140,17 +149,17 @@ class nodoClass(object):
 
     def start(self):
         if not self.running:
-            os.system('echo ' + password + ' | sudo -S ip tuntap add tapc24GHz'+self.octet_str+' mode tap')
-            os.system('echo ' + password + ' | sudo -S ifconfig tapc24GHz'+self.octet_str+' ' +self.tapwrt.ip + ' up')
-            os.system('echo ' + password + ' | sudo -S ip tuntap add tapc50GHz'+self.octet_str+' mode tap')
-            os.system('echo ' + password + ' | sudo -S ifconfig tapc50GHz'+self.octet_str+' ' +self.tapwrt.ip + ' up')
-            os.system('vde_switch -d --hub -s /tmp/c24GHz'+self.octet_str+' -tap tapc24GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
-            os.system('vde_switch -d --hub -s /tmp/c50GHz'+self.octet_str+' -tap tapc50GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
-            os.system('VBoxManage clonevm ' + self.vm + ' --name num'+self.octet_str+' --register')
-            os.system('VBoxManage modifyvm num'+self.octet_str+' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' +str(self.eth0.mac).translate(None,':'))
-            os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
-            os.system('VBoxManage modifyvm num'+ self.octet_str+' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
-            os.system('VBoxManage startvm num'+ self.octet_str  + node_head) # + '--type headless'
+            os.system('echo ' + password + ' | sudo -S ip tuntap add tapc24GHz' + self.octet_str + ' mode tap')
+            os.system('echo ' + password + ' | sudo -S ifconfig tapc24GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
+            os.system('echo ' + password + ' | sudo -S ip tuntap add tapc50GHz' + self.octet_str + ' mode tap')
+            os.system('echo ' + password + ' | sudo -S ifconfig tapc50GHz' + self.octet_str+' ' +self.tapwrt.ip + ' up')
+            os.system('vde_switch -d --hub -s /tmp/c24GHz' + self.octet_str + ' -tap tapc24GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
+            os.system('vde_switch -d --hub -s /tmp/c50GHz' + self.octet_str + ' -tap tapc50GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
+            os.system('VBoxManage clonevm ' + self.vm + ' --name num' + self.octet_str + ' --register')
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' +str(self.eth0.mac).translate(None,':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
+            os.system('VBoxManage startvm num' + self.octet_str + node_head)  # + '--type headless'
             self.running = True
 
 
@@ -166,9 +175,14 @@ class wireClass(object):
         self.name = "wire" + self.s_str + '-' + self.d_str
         self.canal = self.quality['channel']
         self.running = False
-        self.prop ={'loss':self.quality['loss'],'delay':self.quality['delay'],'dup':self.quality['dup'],
-                'bandwith':self.quality['bandwith'],'speed':self.quality['speed'],'capacity':self.quality['capacity'],
-                'damage':self.quality['damage'],'channel':self.quality['channel']}
+        self.prop = {'loss': self.quality['loss'],
+                     'delay': self.quality['delay'],
+                     'dup': self.quality['dup'],
+                     'bandwith': self.quality['bandwith'],
+                     'speed': self.quality['speed'],
+                     'capacity': self.quality['capacity'],
+                     'damage': self.quality['damage'],
+                     'channel': self.quality['channel']}
 
     def __del__(self):
         if nodolist.run:
@@ -179,14 +193,21 @@ class wireClass(object):
 
     def start(self):
         if not self.running:
-            od = 'wirefilter'+' --daemon -v /tmp/' + self.canal + self.s_str +':/tmp/'+ self.canal  + self.d_str
-            if self.prop['loss'] !=0:   od = od + ' -l ' + str(self.prop['loss'])
-            if self.prop['delay'] !=0:  od = od + ' -d ' + str(self.prop['delay']) + '+' + str(self.prop['delay']/2 )+ 'N'
-            if self.prop['dup'] !=0:    od = od + ' -D ' + str(self.prop['dup'])
-            if self.prop['bandwith'] !=0:   od = od + ' -b ' + str(self.prop['bandwith'])
-            if self.prop['speed'] !=0:  od = od + ' -s ' + str(self.prop['speed'])
-            if self.prop['capacity'] !=0:   od = od + ' -c ' + str(self.prop['capacity'])
-            if self.prop['damage'] !=0: od = od + ' -n ' + str(self.prop['damage'])
+            od = 'wirefilter' + ' --daemon -v /tmp/' + self.canal + self.s_str + ':/tmp/' + self.canal + self.d_str
+            if self.prop['loss'] != 0:
+                od = od + ' -l ' + str(self.prop['loss'])
+            if self.prop['delay'] != 0:
+                od = od + ' -d ' + str(self.prop['delay']) + '+' + str(self.prop['delay'] / 2)+ 'N'
+            if self.prop['dup'] != 0:
+                od = od + ' -D ' + str(self.prop['dup'])
+            if self.prop['bandwith'] != 0:
+                od = od + ' -b ' + str(self.prop['bandwith'])
+            if self.prop['speed'] != 0:
+                od = od + ' -s ' + str(self.prop['speed'])
+            if self.prop['capacity'] != 0:
+                od = od + ' -c ' + str(self.prop['capacity'])
+            if self.prop['damage'] != 0:
+                od = od + ' -n ' + str(self.prop['damage'])
             os.system(od)
             self.running = True
 
@@ -231,11 +252,11 @@ def near(punto):
 def open_mesh(widget):
     global link_color24, link_color50, nodolist
     if not nodolist.run:
-        dialog = gtk.FileChooserDialog("Select a mesh file",
+        dialog = gtk.FileChooserDialog(
+            "Select a mesh file",
             None,
             gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-            gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             file_path = dialog.get_filename()
@@ -251,8 +272,10 @@ def open_mesh(widget):
 
 def message_stop():
     md = gtk.MessageDialog(None,
-            gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO,
-            gtk.BUTTONS_CLOSE, "Firs stop emulation")
+                           gtk.DIALOG_DESTROY_WITH_PARENT,
+                           gtk.MESSAGE_INFO,
+                           gtk.BUTTONS_CLOSE,
+                           "Firs stop emulation")
     md.run()
     md.destroy()
 
@@ -269,10 +292,10 @@ def save_mesh(signal):
 def saveas_mesh(signal):
     if not nodolist.run:
         dialog = gtk.FileChooserDialog("Select or create a mesh file",
-            None,
-            gtk.FILE_CHOOSER_ACTION_SAVE,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-            gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+                                       None,
+                                       gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             file_path = dialog.get_filename()
@@ -291,10 +314,10 @@ def select_folder(signal):
     global dir_trabajo
     if not nodolist.run:
         dialog = gtk.FileChooserDialog("Select work directory",
-            None,
-            gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-            gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+                                       None,
+                                       gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             dir_trabajo = dialog.get_filename()
