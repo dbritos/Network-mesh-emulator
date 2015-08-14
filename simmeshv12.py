@@ -700,11 +700,11 @@ def select_vm(signal):
     window.set_title("SELECT VIRTUAL MACHINE")
     combobox = gtk.combo_box_new_text()
     window.add(combobox)
-    virtualBoxManager = vboxapi.VirtualBoxManager(None, None)
-    vbox = virtualBoxManager.vbox
-    vboxVMList = virtualBoxManager.getArray(vbox, 'machines')
-    vboxNameList = [mach.name for mach in vboxVMList]
-    for i in vboxNameList:
+    virtual_box_manager = vboxapi.VirtualBoxManager(None, None)
+    vbox = virtual_box_manager.vbox
+    vbox_vm_list = virtual_box_manager.getArray(vbox, 'machines')
+    vbox_name_list = [mach.name for mach in vbox_vm_list]
+    for i in vbox_name_list:
         combobox.append_text(str(i))
     combobox.connect('changed', changed_cb)
     combobox.set_active(0)
