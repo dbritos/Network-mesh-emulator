@@ -130,9 +130,9 @@ class NodoClass(object):
         if self.running:
             os.system('echo ' + password + ' | sudo -S rm -rf /tmp/c24GHz' + self.octet_str)
             os.system('echo ' + password + ' | sudo -S rm -rf /tmp/c50GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tapc24GHz' +self.octet_str)
+            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tapc24GHz' + self.octet_str)
             os.system('echo ' + password + ' | sudo -S ip link delete tapc24GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tapc50GHz' +self.octet_str)
+            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tapc50GHz' + self.octet_str)
             os.system('echo ' + password + ' | sudo -S ip link delete tapc50GHz' + self.octet_str)
             os.system('VBoxManage controlvm num' + self.octet_str + ' poweroff')
             time.sleep(1)
@@ -154,11 +154,11 @@ class NodoClass(object):
             os.system('echo ' + password + ' | sudo -S ip tuntap add tapc50GHz' + self.octet_str + ' mode tap')
             os.system('echo ' + password + ' | sudo -S ifconfig tapc50GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
             os.system('vde_switch -d --hub -s /tmp/c24GHz' + self.octet_str + ' -tap tapc24GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
-            os.system('vde_switch -d --hub -s /tmp/c50GHz' + self.octet_str + ' -tap tapc50GHz' + self.octet_str + ' -m 666 -f '+ dir_trabajo + '/colourful.rc')
+            os.system('vde_switch -d --hub -s /tmp/c50GHz' + self.octet_str + ' -tap tapc50GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
             os.system('VBoxManage clonevm ' + self.vm + ' --name num' + self.octet_str + ' --register')
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + str(self.eth0.mac).translate(None,':'))
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz' + self.octet_str + '[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz' + self.octet_str + '[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + str(self.eth0.mac).translate(None, ':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz' + self.octet_str + '[2] --macaddress2 ' + str(self.eth1.mac).translate(None, ':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz' + self.octet_str + '[3] --macaddress3 ' + str(self.eth2.mac).translate(None, ':'))
             os.system('VBoxManage startvm num' + self.octet_str + node_head)  # + '--type headless'
             self.running = True
 
