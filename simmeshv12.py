@@ -497,68 +497,71 @@ def dibujar(widget):
             cr.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # yellow
             cr.move_to(1, 60)
             cr.show_text('vm: ' + po.vm)
-            #Draw originators for curren nodo
+            # Draw originators for curren nodo
             if nodolist.run:
-                cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
-                cr.move_to(950,15)
+                cr.set_source_rgba(1.0, 1.0, 1.0, 1.0)
+                cr.move_to(950, 15)
                 cr.show_text("Originators")
-                cr.set_source_rgba(1.0, 1.0, 1.0,1.0)
-                cr.move_to(950+125,15)
+                cr.set_source_rgba(1.0, 1.0, 1.0, 1.0)
+                cr.move_to(950+ 125, 15)
                 cr.show_text("Next Hop")
 #               o,n = po.get_originators_nexthop()
-                rg =len(o)
-                if rg > len(n):rg = len(n)
+                rg = len(o)
+                if rg > len(n):
+                    rg = len(n)
                 for i in range(rg):
-                    cr.set_source_rgba(0.0, 0.7, 0.7,1.0)
-                    if i & 0x01 :cr.set_source_rgba(0.0, 1.0, 1.0,1.0)
-                    cr.move_to(950,40+i*15)
+                    cr.set_source_rgba(0.0, 0.7, 0.7, 1.0)
+                    if i & 0x01:
+                        cr.set_source_rgba(0.0, 1.0, 1.0, 1.0)
+                    cr.move_to(950, 40 + i * 15)
                     cr.show_text(str(o[i]))
-                    cr.move_to(950+125,40+i*15)
+                    cr.move_to(950 + 125, 40 + i * 15)
                     cr.show_text(str(n[i]))
-            #Drow Interface packets for curren nodo
+            # Drow Interface packets for curren nodo
                 for i in po.interfases:
                     if i.ind:
-                        cr.move_to(200*(i.ind-1),15)
-                        cr.show_text(i.name+' rx: '+i.rx+' tx: '+i.tx)
-                    cr.set_source_rgba(0.3, 1.0, 0.3,1.0)
+                        cr.move_to(200 * (i.ind - 1), 15)
+                        cr.show_text(i.name + ' rx: ' + i.rx + ' tx: ' + i.tx)
+                    cr.set_source_rgba(0.3, 1.0, 0.3, 1.0)
 #       else:
 #           cr.set_source_rgba(0.1,0.6, 0.1,1.0)
-        if trace_l2 and str(po) in node_tr:cr.set_source_rgba(1.0,1.0, 1.0,0.5)
+        if trace_l2 and str(po) in node_tr:
+            cr.set_source_rgba(1.0, 1.0, 1.0, 0.5)
         cr.fill()
         cr.stroke()
-        #Draw bat0 packets for each nodo
+        # Draw bat0 packets for each nodo
         cr.set_source_rgb(0.0, 0.0, 0.1)
-        cr.move_to(p[0]-7,p[1]+5)
+        cr.move_to(p[0] - 7, p[1] + 5)
         cr.show_text(str(po))
         if nodolist.run:
-            cr.move_to(p[0]-30,p[1]-30)
+            cr.move_to(p[0] - 30, p[1] - 30)
             cr.set_source_rgb(0.0, 1.0, 0.1)
-            cr.show_text('Rx:'+str(po.bat0.rx))
-            cr.move_to(p[0]-30,p[1]-15)
-            cr.show_text('Tx:'+str(po.bat0.tx))
+            cr.show_text('Rx:' + str(po.bat0.rx))
+            cr.move_to(p[0] - 30, p[1] - 15)
+            cr.show_text('Tx:' + str(po.bat0.tx))
     cr.stroke()
     if trace_l2:
         x = -60
         y = 950
-        cr.set_line_width (1.0)
+        cr.set_line_width(1.0)
         for i in node_tr:
             if len(i) == 2:
                 x = x + 80
                 if x > 900:
                     x = 20
                     y = 975
-                cr.set_source_rgba(0.0, 1.0, 0.0,1.0)
-                cr.move_to(x+12,y)
-                cr.arc(x,y, 12, 0, 2*math.pi)
-                cr.move_to(x-7,y+5)
+                cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)
+                cr.move_to(x + 12, y)
+                cr.arc(x, y, 12, 0, 2 * math.pi)
+                cr.move_to(x - 7, y + 5)
                 cr.show_text(i)
             elif '.' in i:
-                cr.set_source_rgba(1.0, 1.0, 0.0,1.0)
-                cr.move_to(x+14,y+5)
+                cr.set_source_rgba(1.0, 1.0, 0.0, 1.0)
+                cr.move_to(x + 14, y + 5)
                 cr.show_text(i)
             else:
-                cr.set_source_rgba(1.0, 0.0, 0.0,1.0)
-                cr.move_to(x+14,y+5)
+                cr.set_source_rgba(1.0, 0.0, 0.0, 1.0)
+                cr.move_to(x + 14, y + 5)
                 cr.show_text('too delay')
     cr.stroke()
 
@@ -567,101 +570,101 @@ def dibujar(widget):
 def expose_event(widget, event):
     ti = time.time()
     dibujar(widget)
-    tf =time.time()
+    tf = time.time()
 #   print tf-ti
     return False
 
 
 def button_press_event(widget, event):
     global inicio
-    if cr != None:
+    if cr is not None:
         inicio = near((event.x, event.y))
     return True
 
 
 def button_release_event(widget, event):
-    global wire_prop, trace_l2, node_tr,o,n
+    global wire_prop, trace_l2, node_tr, o, n
     fin = near((event.x, event.y))
     if fin[0] < 950 and fin[0] > 50 and fin[1] < 950 and fin[1] > 50:
-        if event.button == 1 and cr != None:
-            if inicio==fin:
-                if not nodolist.run and not any(x.pos==inicio for x in nodolist):
+        if event.button == 1 and cr is not None:
+            if inicio == fin:
+                if not nodolist.run and not any(x.pos == inicio for x in nodolist):
                     nodolist.append(nodoClass(inicio))
                     nodolist.set_cur_pos(inicio)
-            elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
+            elif any(x.pos == inicio for x in nodolist) and any(x.pos == fin for x in nodolist):
                 if nodolist.run and trace_l2:
                     for x in nodolist:
-                        if x.pos==fin:
+                        if x.pos == fin:
                             trace_fin_mac = str(x.bat0.mac)
-                        if x.pos==inicio:
+                        if x.pos == inicio:
                             trace_nicio_ip = str(x.eth0.ip)
                             pos_ini = str(x)
                     l = []
-                    mibr=netsnmp.Varbind('iso','3.6.1.4.1.32.1.4',trace_fin_mac,'OCTETSTR')
-                    orig = netsnmp.snmpset(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=10000000,Retries=1)
-                    mibr=netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
-                    orig = netsnmp.snmpget(mibr, Version = 2, DestHost = trace_nicio_ip,Community='private',Timeout=1000000,Retries=1)
+                    mibr = netsnmp.Varbind('iso', '3.6.1.4.1.32.1.4', trace_fin_mac, 'OCTETSTR')
+                    orig = netsnmp.snmpset(mibr, Version=2, DestHost=trace_nicio_ip, Community='private', Timeout=10000000, Retries=1)
+                    mibr = netsnmp.Varbind('iso.3.6.1.4.1.32.1.4')
+                    orig = netsnmp.snmpget(mibr, Version=2, DestHost=trace_nicio_ip, Community='private', Timeout=1000000, Retries=1)
                     for i in str(orig[0]).split():
                         l.append(i.split(':')[-1:])
-                    node_tr = reduce(lambda x,y: x+y,l)
-                    node_tr.insert(0,pos_ini)
+                    node_tr = reduce(lambda x, y: x + y, l)
+                    node_tr.insert(0, pos_ini)
                 else:
-                    link_color24.current_wire = [(inicio,fin),(fin,inicio)]
-                    link_color50.current_wire = [(inicio,fin),(fin,inicio)]
+                    link_color24.current_wire = [(inicio, fin), (fin, inicio)]
+                    link_color50.current_wire = [(inicio, fin), (fin, inicio)]
                     if wire_prop['channel'] == 'c24GHz':
-                        if (not any(x.sd in link_color24.current_wire  for x in link_color24)):
-                            link_color24.append(wireClass(inicio,fin, wire_prop))
+                        if (not any(x.sd in link_color24.current_wire for x in link_color24)):
+                            link_color24.append(wireClass(inicio, fin, wire_prop))
                             if nodolist.run:
                                 link_color24.start()
                                 link_color50.start()
                     if wire_prop['channel'] == 'c50GHz':
-                        if (not any(x.sd in link_color50.current_wire  for x in link_color50)):
-                            link_color50.append(wireClass(inicio,fin, wire_prop))
+                        if (not any(x.sd in link_color50.current_wire for x in link_color50)):
+                            link_color50.append(wireClass(inicio, fin, wire_prop))
                             if nodolist.run:
                                 link_color24.start()
                                 link_color50.start()
-        if event.button == 2 and cr != None:
-            if inicio==fin:
-                if any(x.pos==inicio for x in nodolist):
+        if event.button == 2 and cr is not None:
+            if inicio == fin:
+                if any(x.pos == inicio for x in nodolist):
                     nodolist.set_cur_pos(inicio)
                     if nodolist.run:
                         for x in nodolist:
-                            if x.pos==fin:
-                                o,n = x.get_originators_nexthop()
+                            if x.pos == fin:
+                                o, n = x.get_originators_nexthop()
             else:
-                link_color24.current_wire = [(inicio,fin),(fin,inicio)]
+                link_color24.current_wire = [(inicio, fin), (fin, inicio)]
                 if wire_prop['channel'] == 'c24GHz':
-                    if any(x.pos in [inicio,fin] for x in nodolist):
-                        if any(x.sd in link_color24.current_wire  for x in link_color24):
+                    if any(x.pos in [inicio, fin] for x in nodolist):
+                        if any(x.sd in link_color24.current_wire for x in link_color24):
                             for x in link_color24:
                                 if x.ds in link_color24.current_wire:
                                     wire_prop = x.prop
-                link_color50.current_wire = [(inicio,fin),(fin,inicio)]
+                link_color50.current_wire = [(inicio, fin), (fin, inicio)]
                 if wire_prop['channel'] == 'c50GHz':
-                    if any(x.pos in [inicio,fin] for x in nodolist):
-                        if any(x.sd in link_color50.current_wire  for x in link_color50):
+                    if any(x.pos in [inicio, fin] for x in nodolist):
+                        if any(x.sd in link_color50.current_wire for x in link_color50):
                             for x in link_color50:
                                 if x.ds in link_color50.current_wire:
                                     wire_prop = x.prop
 
-        elif event.button == 3 and cr != None:
-            if inicio==fin:
+        elif event.button == 3 and cr is not None:
+            if inicio == fin:
                 if not nodolist.run:
-                    if any(x.pos==inicio for x in nodolist):
+                    if any(x.pos == inicio for x in nodolist):
                         for x in nodolist:
-                            if x.pos==inicio:
-                                nid=nodolist.index(x)
+                            if x.pos == inicio:
+                                nid = nodolist.index(x)
                                 i = nodolist.pop(nid)
-            elif any(x.pos ==inicio for x in nodolist) and any(x.pos ==fin for x in nodolist):
+            elif any(x.pos == inicio for x in nodolist) and any(x.pos == fin for x in nodolist):
                 if wire_prop['channel'] == 'c24GHz':
                     for x in link_color24:
-                        if x.sd in [(inicio,fin),(fin,inicio)]:
-                            lid=link_color24.index(x)
+                        if x.sd in [(inicio, fin), (fin, inicio)]:
+                            lid = link_color24.index(x)
                             i = link_color24.pop(lid)
                 if wire_prop['channel'] == 'c50GHz':
                     for x in link_color50:
-                        if x.sd in [(inicio,fin),(fin,inicio)]:
-                            lid=link_color50.index(x)
+                        if x.sd in [(inicio, fin), (fin, inicio)]:
+                            lid = link_color50.index(x)
                             i = link_color50.pop(lid)
 
         dibujar(widget)
@@ -719,7 +722,7 @@ def on_changed(widget):
 
 def callback(self, button):
     global wire_prop
-    wire_prop['channel']= button
+    wire_prop['channel'] = button
 
 
 class wire(gtk.Window):
@@ -728,7 +731,7 @@ class wire(gtk.Window):
         self.set_size_request(400, 700)
         self.set_border_width(10)
         self.set_title("WIREFILTER SETUP")
-        self.connect("delete_event", lambda w,e: self.destroy())
+        self.connect("delete_event", lambda w, e: self.destroy())
 
         vbox_app = gtk.VBox(False, 0)
         self.add(vbox_app)
@@ -744,79 +747,79 @@ class wire(gtk.Window):
         scale_set_default_values(vscale1)
         vscale1.set_name('loss')
         vbox1.pack_start(vscale1, True, True, 0)
-        vscale1.connect("value-changed",on_changed)
+        vscale1.connect("value-changed", on_changed)
         vscale1.show()
 
         label1 = gtk.Label("Extra  delay in milliseconds: ")
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj2= gtk.Adjustment(wire_prop['delay'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj2 = gtk.Adjustment(wire_prop['delay'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale2 = gtk.HScale(adj2)
         scale_set_default_values(vscale2)
         vscale2.set_name('delay')
         vbox1.pack_start(vscale2, True, True, 0)
-        vscale2.connect("value-changed",on_changed)
+        vscale2.connect("value-changed", on_changed)
         vscale2.show()
 
         label1 = gtk.Label("dup percentage of dup packet: ")
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj3= gtk.Adjustment(wire_prop['dup'], 0.0, 101.0, 1.0, 1.0, 1.0)
+        adj3 = gtk.Adjustment(wire_prop['dup'], 0.0, 101.0, 1.0, 1.0, 1.0)
         vscale3 = gtk.HScale(adj3)
         scale_set_default_values(vscale3)
         vscale3.set_name('dup')
         vbox1.pack_start(vscale3, True, True, 0)
-        vscale3.connect("value-changed",on_changed)
+        vscale3.connect("value-changed", on_changed)
         vscale3.show()
 
         label1 = gtk.Label("Channel bandwidth in Bytes/sec: ")
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj4= gtk.Adjustment(wire_prop['bandwith'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj4 = gtk.Adjustment(wire_prop['bandwith'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale4 = gtk.HScale(adj4)
         scale_set_default_values(vscale4)
         vscale4.set_name('bandwith')
         vbox1.pack_start(vscale4, True, True, 0)
-        vscale4.connect("value-changed",on_changed)
+        vscale4.connect("value-changed", on_changed)
         vscale4.show()
 
         label1 = gtk.Label("Interface  speed  in  Bytes/sec: ")
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj5= gtk.Adjustment(wire_prop['speed'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj5 = gtk.Adjustment(wire_prop['speed'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale5 = gtk.HScale(adj5)
         scale_set_default_values(vscale5)
         vscale5.set_name('speed')
         vbox1.pack_start(vscale5, True, True, 0)
-        vscale5.connect("value-changed",on_changed)
+        vscale5.connect("value-changed", on_changed)
         vscale5.show()
 
         label1 = gtk.Label("Channel  capacity  in Bytes: ")
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj6= gtk.Adjustment(wire_prop['capacity'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj6 = gtk.Adjustment(wire_prop['capacity'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale6 = gtk.HScale(adj6)
         scale_set_default_values(vscale6)
         vscale6.set_name('capacity')
         vbox1.pack_start(vscale6, True, True, 0)
-        vscale6.connect("value-changed",on_changed)
+        vscale6.connect("value-changed", on_changed)
         vscale6.show()
 
         label1 = gtk.Label("Number bits damaged/Megabyte: ")
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj7= gtk.Adjustment(wire_prop['damage'], 0.0, 101.0, 1.0, 1.0, 1.0)
+        adj7 = gtk.Adjustment(wire_prop['damage'], 0.0, 101.0, 1.0, 1.0, 1.0)
         vscale7 = gtk.HScale(adj7)
         scale_set_default_values(vscale7)
         vscale7.set_name('damage')
         vbox1.pack_start(vscale7, True, True, 0)
-        vscale7.connect("value-changed",on_changed)
+        vscale7.connect("value-changed", on_changed)
         vscale7.show()
 
         hbox1 = gtk.HBox(gtk.FALSE, 0)
@@ -826,12 +829,14 @@ class wire(gtk.Window):
 
         button = gtk.RadioButton(None, "2.4 GHz")
         button.connect("toggled", callback, "c24GHz")
-        if wire_prop['channel'] =="c24GHz": button.set_active(gtk.TRUE)
+        if wire_prop['channel'] == "c24GHz":
+            button.set_active(gtk.TRUE)
         hbox1.pack_start(button, gtk.TRUE, gtk.TRUE, 0)
         button.show()
         button = gtk.RadioButton(button, "5.0 GHz")
         button.connect("toggled", callback, "c50GHz")
-        if wire_prop['channel'] =="c50GHz": button.set_active(gtk.TRUE)
+        if wire_prop['channel'] == "c50GHz":
+            button.set_active(gtk.TRUE)
         hbox1.pack_start(button, gtk.TRUE, gtk.TRUE, 0)
         button.show()
 
@@ -854,15 +859,15 @@ class wire(gtk.Window):
 
 
 def get_mesh(dir_trabajo):
-    global nodolist,link_color24,link_color50
+    global nodolist, link_color24, link_color50
     dm = dir_trabajo + '/data.ms'
-    if  os.path.isfile('data.ms'):
+    if os.path.isfile('data.ms'):
         with open(dm, 'rb') as f:
-            nodolist,link_color24,link_color50 = pickle.load(f)
+            nodolist, link_color24, link_color50 = pickle.load(f)
 
 
 def create_colorfull(dir_trabajo):
-    f = open(dir_trabajo + '/colourful.rc','w')
+    f = open(dir_trabajo + '/colourful.rc', 'w')
     f.write('port/setcolourful 1\n')
     f.write('port/create 1\n')
     f.write('port/create 2\n')
@@ -936,11 +941,11 @@ class MenuApp(gtk.Window):
     # create the items for Edit menu
         delmesh = gtk.MenuItem("Delete Mesh")
         editmenu.append(delmesh)
-        delmesh.connect("activate",delete_mesh)
+        delmesh.connect("activate", delete_mesh)
 
         delnodo = gtk.MenuItem("Delete Nodo")
         editmenu.append(delnodo)
-        delnodo.connect("activate",remover_nodos)
+        delnodo.connect("activate", remover_nodos)
 
         dellink = gtk.MenuItem("Delete Link")
         editmenu.append(dellink)
@@ -975,12 +980,12 @@ class MenuApp(gtk.Window):
         trace = gtk.CheckMenuItem("Trace route on")
         trace.set_active(False)
         toolsmenu.append(trace)
-        trace.connect("activate",traceon)
+        trace.connect("activate", traceon)
 
         head = gtk.CheckMenuItem("VM Headless on")
         head.set_active(False)
         toolsmenu.append(head)
-        head.connect("activate",headon)
+        head.connect("activate", headon)
 
         # append the top items
         menubar.append(filem)
@@ -996,7 +1001,7 @@ class MenuApp(gtk.Window):
     # Create the drawing area
         drawing_area = gtk.DrawingArea()
         drawing_area.set_size_request(1000, 1000)
-        drawing_area.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(0,0,0))
+        drawing_area.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(0, 0, 0))
         vbox.pack_start(drawing_area, True, True, 0)
         drawing_area.show()
 
@@ -1009,30 +1014,30 @@ class MenuApp(gtk.Window):
         drawing_area.connect("button_press_event", button_press_event)
         drawing_area.connect("button_release_event", button_release_event)
 
-        drawing_area.set_events(gtk.gdk.EXPOSURE_MASK
-                        | gtk.gdk.LEAVE_NOTIFY_MASK
-                        | gtk.gdk.BUTTON_PRESS_MASK
-                        | gtk.gdk.BUTTON_RELEASE_MASK
-                        | gtk.gdk.BUTTON3_MOTION_MASK
-                        | gtk.gdk.POINTER_MOTION_MASK
-                        | gtk.gdk.POINTER_MOTION_HINT_MASK)
+        drawing_area.set_events(gtk.gdk.EXPOSURE_MASK |
+                                gtk.gdk.LEAVE_NOTIFY_MASK |
+                                gtk.gdk.BUTTON_PRESS_MASK |
+                                gtk.gdk.BUTTON_RELEASE_MASK |
+                                gtk.gdk.BUTTON3_MOTION_MASK |
+                                gtk.gdk.POINTER_MOTION_MASK |
+                                gtk.gdk.POINTER_MOTION_HINT_MASK)
 
     # add the vbox to the window
         self.add(vbox)
         self.connect("destroy", gtk.main_quit)
 
         self.show_all()
-        gobject.timeout_add( 2000, self.tick )
+        gobject.timeout_add(2000, self.tick)
 #       gobject.idle_add(self.tick )
         global password
         password = getPassword()
         global dir_trabajo
         dir_trabajo = os.getcwd()
-        if  not os.path.isfile('colourful.rc'):
+        if not os.path.isfile('colourful.rc'):
             create_colorfull(dir_trabajo)
         get_mesh(dir_trabajo)
 
-    def tick (self):
+    def tick(self):
         self.queue_draw()
         return True
 
