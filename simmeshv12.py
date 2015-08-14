@@ -475,27 +475,27 @@ def dibujar(widget):
                 elif float(po.load_average) > 1:
                     po.count = 10
                 else:
-                    cr.set_source_rgba(0.1, 0.6, 0.1,1.0)
+                    cr.set_source_rgba(0.1, 0.6, 0.1, 1.0)
                     mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11')
-                    rx = netsnmp.snmpwalk(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)
+                    rx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
                     mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
-                    tx = netsnmp.snmpwalk(mibr, Version = 2, DestHost = po.smp_ip,Community='public',Timeout=5000,Retries=1)
+                    tx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
                     for i in po.interfases:
                         if i.ind:
                             if i.ind < len(rx):
-                                i.rx = rx[i.ind-1]
+                                i.rx = rx[i.ind - 1]
                             else:
                                 i.rx = '0'
                             if i.ind < len(tx):
-                                i.tx = tx[i.ind-1]
+                                i.tx = tx[i.ind - 1]
                             else:
                                 i.tx = '0'
             else:
-                po.count = po.count -1
-                cr.set_source_rgba(1.0, 0.0, 0.3,1.0)
+                po.count = po.count - 1
+                cr.set_source_rgba(1.0, 0.0, 0.3, 1.0)
         if po.pos == nodolist.current.pos:
-            cr.set_source_rgba(1.0, 1.0, 0.0,1.0) # yellow
-            cr.move_to(1,60)
+            cr.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # yellow
+            cr.move_to(1, 60)
             cr.show_text('vm: ' + po.vm)
             #Draw originators for curren nodo
             if nodolist.run:
