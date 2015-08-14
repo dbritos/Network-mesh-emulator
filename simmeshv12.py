@@ -565,14 +565,14 @@ def dibujar(widget):
     cr.stroke()
     if trace_l2:
         x = -60
-        y = 950
+        y = h - 50
         cr.set_line_width(1.0)
         for i in node_tr:
             if len(i) == 2:
                 x = x + 80
                 if x > 900:
                     x = 20
-                    y = 975
+                    y = h - 25
                 cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)
                 cr.move_to(x + 12, y)
                 cr.arc(x, y, 12, 0, 2 * math.pi)
@@ -906,8 +906,11 @@ def create_colorfull(dir_trabajo):
 class MenuApp(gtk.Window):
     def __init__(self):
         super(MenuApp, self).__init__()
+        screen = self.get_screen()
         self.set_title("Mesh network emulator")
-        self.set_size_request(1201, 1001)
+        self.set_size_request(min(screen.get_width(), 800),
+                              min(screen.get_height(), 600))
+        self.maximize()
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(6400, 6400, 6440))
         self.set_position(gtk.WIN_POS_CENTER)
         # top level menu bar
@@ -940,7 +943,7 @@ class MenuApp(gtk.Window):
         saveas = gtk.MenuItem("Save as")
         filemenu.append(saveas)
         saveas.connect("activate", save_as_mesh)
-    # separator
+        # separator
         separat = gtk.SeparatorMenuItem()
         filemenu.append(separat)
 
@@ -1023,7 +1026,7 @@ class MenuApp(gtk.Window):
 
     # Create the drawing area
         drawing_area = gtk.DrawingArea()
-        drawing_area.set_size_request(1000, 1000)
+        # drawing_area.set_size_request(1000, 1000)
         drawing_area.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(0, 0, 0))
         vbox.pack_start(drawing_area, True, True, 0)
         drawing_area.show()
