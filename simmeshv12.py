@@ -152,13 +152,13 @@ class NodoClass(object):
             os.system('echo ' + password + ' | sudo -S ip tuntap add tapc24GHz' + self.octet_str + ' mode tap')
             os.system('echo ' + password + ' | sudo -S ifconfig tapc24GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
             os.system('echo ' + password + ' | sudo -S ip tuntap add tapc50GHz' + self.octet_str + ' mode tap')
-            os.system('echo ' + password + ' | sudo -S ifconfig tapc50GHz' + self.octet_str+' ' +self.tapwrt.ip + ' up')
-            os.system('vde_switch -d --hub -s /tmp/c24GHz' + self.octet_str + ' -tap tapc24GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
-            os.system('vde_switch -d --hub -s /tmp/c50GHz' + self.octet_str + ' -tap tapc50GHz'+self.octet_str+' -m 666 -f '+ dir_trabajo + '/colourful.rc')
+            os.system('echo ' + password + ' | sudo -S ifconfig tapc50GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
+            os.system('vde_switch -d --hub -s /tmp/c24GHz' + self.octet_str + ' -tap tapc24GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
+            os.system('vde_switch -d --hub -s /tmp/c50GHz' + self.octet_str + ' -tap tapc50GHz' + self.octet_str + ' -m 666 -f '+ dir_trabajo + '/colourful.rc')
             os.system('VBoxManage clonevm ' + self.vm + ' --name num' + self.octet_str + ' --register')
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' +str(self.eth0.mac).translate(None,':'))
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz'+ self.octet_str+'[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz'+ self.octet_str+'[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + str(self.eth0.mac).translate(None,':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz' + self.octet_str + '[2] --macaddress2 ' + str(self.eth1.mac).translate(None,':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz' + self.octet_str + '[3] --macaddress3 ' + str(self.eth2.mac).translate(None,':'))
             os.system('VBoxManage startvm num' + self.octet_str + node_head)  # + '--type headless'
             self.running = True
 
@@ -289,7 +289,7 @@ def save_mesh(signal):
         message_stop()
 
 
-def saveas_mesh(signal):
+def save_as_mesh(signal):
     if not nodolist.run:
         dialog = gtk.FileChooserDialog("Select or create a mesh file",
                                        None,
@@ -939,7 +939,7 @@ class MenuApp(gtk.Window):
 
         saveas = gtk.MenuItem("Save as")
         filemenu.append(saveas)
-        saveas.connect("activate", saveas_mesh)
+        saveas.connect("activate", save_as_mesh)
     # separator
         separat = gtk.SeparatorMenuItem()
         filemenu.append(separat)
@@ -949,13 +949,13 @@ class MenuApp(gtk.Window):
         agr = gtk.AccelGroup()
         self.add_accel_group(agr)
 
-        quitImg = gtk.ImageMenuItem(gtk.STOCK_QUIT, agr)
+        quit_img = gtk.ImageMenuItem(gtk.STOCK_QUIT, agr)
         key, mod = gtk.accelerator_parse("Q")
-        quitImg.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-        filemenu.append(quitImg)
+        quit_img.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        filemenu.append(quit_img)
 
         # connect to Quit the activate event
-        quitImg.connect("activate", gtk.main_quit)
+        quit_img.connect("activate", gtk.main_quit)
 
     # create the edit menu and attach it to the top item
         editmenu = gtk.Menu()
