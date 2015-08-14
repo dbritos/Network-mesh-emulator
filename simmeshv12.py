@@ -72,7 +72,7 @@ link_color50 = LinkList()
 nodolist = NodoList()
 
 
-class interface(object):
+class Interface(object):
     def __init__(self, indice, name, nodonum, oamip):
         self.ind = indice
         self.name = name
@@ -84,10 +84,10 @@ class interface(object):
                    'oam': '192.168.100.' + nodonum,
                    'lo': None,
                    'eth0': '192.168.100.' + nodonum,
-                   'eth1':None,
-                   'eth2':None,
-                   'bat0':'192.168.7.' + nodonum, }[name]
-        self.mac = {'tapwrt': None, 
+                   'eth1': None,
+                   'eth2': None,
+                   'bat0': '192.168.7.' + nodonum, }[name]
+        self.mac = {'tapwrt': None,
                     'oam': None,
                     'lo': None,
                     'eth0': '80:01:00:00:07:' + nodonum,
@@ -99,20 +99,20 @@ class interface(object):
         return str(self.name)
 
 
-class nodoClass(object):
+class NodoClass(object):
     def __init__(self, p):
         self.pos = p
         self.num = int((p[0] // 100) * 10 + p[1] // 100)
         self.name = 'wrt' + str(self.num)
         self.octet_str = str(self.num)
         self.smp_ip = '192.168.100.' + str(self)
-        self.oam = interface(None, 'oam', str(self), self.smp_ip)
-        self.tapwrt = interface(None, 'tapwrt', str(self), self.smp_ip)
-        self.lo = interface(1, 'lo', str(self), self.smp_ip)
-        self.eth0 = interface(2, 'eth0', str(self), self.smp_ip)
-        self.eth1 = interface(3, 'eth1', str(self), self.smp_ip)
-        self.eth2 = interface(4, 'eth2', str(self), self.smp_ip)
-        self.bat0 = interface(5, 'bat0', str(self), self.smp_ip)
+        self.oam = Interface(None, 'oam', str(self), self.smp_ip)
+        self.tapwrt = Interface(None, 'tapwrt', str(self), self.smp_ip)
+        self.lo = Interface(1, 'lo', str(self), self.smp_ip)
+        self.eth0 = Interface(2, 'eth0', str(self), self.smp_ip)
+        self.eth1 = Interface(3, 'eth1', str(self), self.smp_ip)
+        self.eth2 = Interface(4, 'eth2', str(self), self.smp_ip)
+        self.bat0 = Interface(5, 'bat0', str(self), self.smp_ip)
         self.interfases = [self.tapwrt, self.oam, self.lo, self.eth0, self.eth1, self.eth2, self.bat0]
         self.originator_nexthop = ['None'], ['None']
         self.vm = v_name_base
@@ -163,7 +163,7 @@ class nodoClass(object):
             self.running = True
 
 
-class wireClass(object):
+class WireClass(object):
     def __init__(self, src, dst, quality):
         self.s = src
         self.d = dst
@@ -612,7 +612,7 @@ def button_release_event(widget, event):
         if event.button == 1 and cr is not None:
             if inicio == fin:
                 if not nodolist.run and not any(x.pos == inicio for x in nodolist):
-                    nodolist.append(nodoClass(inicio))
+                    nodolist.append(NodoClass(inicio))
                     nodolist.set_cur_pos(inicio)
             elif any(x.pos == inicio for x in nodolist) and any(x.pos == fin for x in nodolist):
                 if nodolist.run and trace_l2:
@@ -636,13 +636,13 @@ def button_release_event(widget, event):
                     link_color50.current_wire = [(inicio, fin), (fin, inicio)]
                     if wire_prop['channel'] == 'c24GHz':
                         if (not any(x.sd in link_color24.current_wire for x in link_color24)):
-                            link_color24.append(wireClass(inicio, fin, wire_prop))
+                            link_color24.append(WireClass(inicio, fin, wire_prop))
                             if nodolist.run:
                                 link_color24.start()
                                 link_color50.start()
                     if wire_prop['channel'] == 'c50GHz':
                         if (not any(x.sd in link_color50.current_wire for x in link_color50)):
-                            link_color50.append(wireClass(inicio, fin, wire_prop))
+                            link_color50.append(WireClass(inicio, fin, wire_prop))
                             if nodolist.run:
                                 link_color24.start()
                                 link_color50.start()
@@ -722,7 +722,7 @@ def changed_cb(combobox):
 
 
 def wire_show(signal):
-    wire()
+    Wire()
 
 
 def menuitem_response():
@@ -748,9 +748,9 @@ def callback(self, button):
     wire_prop['channel'] = button
 
 
-class wire(gtk.Window):
+class Wire(gtk.Window):
     def __init__(self):
-        super(wire, self).__init__()
+        super(Wire, self).__init__()
         self.set_size_request(400, 700)
         self.set_border_width(10)
         self.set_title("WIREFILTER SETUP")
