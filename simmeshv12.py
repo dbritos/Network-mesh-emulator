@@ -253,10 +253,12 @@ def open_mesh(widget):
     global link_color24, link_color50, nodolist
     if not nodolist.run:
         dialog = gtk.FileChooserDialog(
-            "Select a mesh file",
-            None,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            title="Select a mesh file",
+            parent=None,
+            action=gtk.FILE_CHOOSER_ACTION_OPEN,
+            buttons=(gtk.STOCK_CANCEL,
+                     gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             file_path = dialog.get_filename()
@@ -271,11 +273,11 @@ def open_mesh(widget):
 
 
 def message_stop():
-    md = gtk.MessageDialog(None,
-                           gtk.DIALOG_DESTROY_WITH_PARENT,
-                           gtk.MESSAGE_INFO,
-                           gtk.BUTTONS_CLOSE,
-                           "Firs stop emulation")
+    md = gtk.MessageDialog(parent=None,
+                           flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                           type=gtk.MESSAGE_INFO,
+                           buttons=gtk.BUTTONS_CLOSE,
+                           message_format="First stop emulation.")
     md.run()
     md.destroy()
 
@@ -291,11 +293,11 @@ def save_mesh(signal):
 
 def save_as_mesh(signal):
     if not nodolist.run:
-        dialog = gtk.FileChooserDialog("Select or create a mesh file",
-                                       None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog = gtk.FileChooserDialog(title="Select or create a mesh file",
+                                       parent=None,
+                                       flags=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                                gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             file_path = dialog.get_filename()
@@ -342,7 +344,7 @@ def get_password():
     dialog.set_markup('Please enter your <b>password</b>:')
     entry = gtk.Entry()
     entry.connect("activate", response_to_dialog, dialog, gtk.RESPONSE_OK)
-    entry.set_visibility(False)
+    entry.set_visibility(False)  # Hide password chars
     hbox = gtk.HBox()
     hbox.pack_start(gtk.Label("Password:"), False, 5, 5)
     hbox.pack_end(entry)
