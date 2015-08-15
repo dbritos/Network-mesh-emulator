@@ -334,11 +334,11 @@ def response_to_dialog(entry, dialog, response):
 
 def get_password():
     dialog = gtk.MessageDialog(
-        None,
-        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-        gtk.MESSAGE_QUESTION,
-        gtk.BUTTONS_OK,
-        None)
+        parent=None,
+        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+        type=gtk.MESSAGE_QUESTION,
+        buttons=gtk.BUTTONS_OK,
+        message_format=None)
     dialog.set_markup('Please enter your <b>password</b>:')
     entry = gtk.Entry()
     entry.connect("activate", response_to_dialog, dialog, gtk.RESPONSE_OK)
@@ -348,6 +348,7 @@ def get_password():
     hbox.pack_end(entry)
     dialog.format_secondary_markup("This will be used for create interfaces in your local machine")
     dialog.vbox.pack_end(hbox, True, True, 0)
+    dialog.set_position(gtk.WIN_POS_CENTER)
     dialog.show_all()
     dialog.run()
     text = entry.get_text()
@@ -565,14 +566,14 @@ def dibujar(widget):
     cr.stroke()
     if trace_l2:
         x = -60
-        y = 950
+        y = h - 50
         cr.set_line_width(1.0)
         for i in node_tr:
             if len(i) == 2:
                 x = x + 80
-                if x > 900:
+                if x > w -900:
                     x = 20
-                    y = 975
+                    y = h - 25
                 cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)
                 cr.move_to(x + 12, y)
                 cr.arc(x, y, 12, 0, 2 * math.pi)
@@ -906,8 +907,11 @@ def create_colorfull(dir_trabajo):
 class MenuApp(gtk.Window):
     def __init__(self):
         super(MenuApp, self).__init__()
+        screen = self.get_screen()
         self.set_title("Mesh network emulator")
-        self.set_size_request(1201, 1001)
+        self.set_size_request(min(screen.get_width(), 800),
+                              min(screen.get_height(), 600))
+        self.maximize()
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(6400, 6400, 6440))
         self.set_position(gtk.WIN_POS_CENTER)
         # top level menu bar
@@ -940,7 +944,7 @@ class MenuApp(gtk.Window):
         saveas = gtk.MenuItem("Save as")
         filemenu.append(saveas)
         saveas.connect("activate", save_as_mesh)
-    # separator
+        # separator
         separat = gtk.SeparatorMenuItem()
         filemenu.append(separat)
 
@@ -1023,7 +1027,7 @@ class MenuApp(gtk.Window):
 
     # Create the drawing area
         drawing_area = gtk.DrawingArea()
-        drawing_area.set_size_request(1000, 1000)
+        # drawing_area.set_size_request(1000, 1000)
         drawing_area.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(0, 0, 0))
         vbox.pack_start(drawing_area, True, True, 0)
         drawing_area.show()
