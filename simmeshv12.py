@@ -113,7 +113,7 @@ class NodoClass(object):
         self.eth1 = Interface(3, 'eth1', str(self), self.smp_ip)
         self.eth2 = Interface(4, 'eth2', str(self), self.smp_ip)
         self.bat0 = Interface(5, 'bat0', str(self), self.smp_ip)
-        self.interfases = [self.tapwrt, self.oam, self.lo, self.eth0, self.eth1, self.eth2, self.bat0]
+        self.interfaces = [self.tapwrt, self.oam, self.lo, self.eth0, self.eth1, self.eth2, self.bat0]
         self.originator_nexthop = ['None'], ['None']
         self.vm = v_name_base
         self.load_average = '0.00'
@@ -506,7 +506,7 @@ def dibujar(widget):
                     rx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
                     mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
                     tx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
-                    for i in po.interfases:
+                    for i in po.interfaces:
                         if i.ind:
                             if i.ind < len(rx):
                                 i.rx = rx[i.ind - 1]
@@ -544,7 +544,7 @@ def dibujar(widget):
                     cr.move_to(950 + 125, 40 + i * 15)
                     cr.show_text(str(n[i]))
             # Drow Interface packets for curren nodo
-                for i in po.interfases:
+                for i in po.interfaces:
                     if i.ind:
                         cr.move_to(200 * (i.ind - 1), 15)
                         cr.show_text(i.name + ' rx: ' + i.rx + ' tx: ' + i.tx)
