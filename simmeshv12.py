@@ -12,8 +12,8 @@ import time
 import vboxapi
 
 dir_trabajo = ''
-wire_prop = {'loss': 0, 'delay': 0, 'dup': 0, 'bandwith': 0, 'speed': 0,
-             'capacity': 0, 'damage': 0, 'channel': 'c24GHz'}
+wire_prop = {'lo': 0, 'de': 0, 'du': 0, 'bw': 0, 'sp': 0,
+             'ca': 0, 'da': 0, 'ch': '24GHz'}
 password = ''
 v_name_base = 'openwrtv12'
 trace_l2 = False
@@ -93,7 +93,8 @@ class Interface(object):
                     'eth0': '80:01:00:00:07:' + nodonum,
                     'eth1': '80:02:00:00:07:' + nodonum,
                     'eth2': '80:05:00:00:07:' + nodonum,
-                    'bat0': '90:' + nodonum + ':' + nodonum + ':' + nodonum + ':' + nodonum + ':' + nodonum}[name]
+                    'bat0': '90:' + nodonum + ':' + nodonum + ':' + nodonum +
+                    ':' + nodonum + ':' + nodonum}[name]
 
     def __str__(self):
         return str(self.name)
@@ -113,7 +114,8 @@ class NodoClass(object):
         self.eth1 = Interface(3, 'eth1', str(self), self.smp_ip)
         self.eth2 = Interface(4, 'eth2', str(self), self.smp_ip)
         self.bat0 = Interface(5, 'bat0', str(self), self.smp_ip)
-        self.interfases = [self.tapwrt, self.oam, self.lo, self.eth0, self.eth1, self.eth2, self.bat0]
+        self.interfases = [self.tapwrt, self.oam, self.lo, self.eth0, 
+                           self.eth1, self.eth2, self.bat0]
         self.originator_nexthop = ['None'], ['None']
         self.vm = v_name_base
         self.load_average = '0.00'
@@ -128,12 +130,15 @@ class NodoClass(object):
 
     def stop(self):
         if self.running:
-            os.system('echo ' + password + ' | sudo -S rm -rf /tmp/c24GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S rm -rf /tmp/c50GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tapc24GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S ip link delete tapc24GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tapc50GHz' + self.octet_str)
-            os.system('echo ' + password + ' | sudo -S ip link delete tapc50GHz' + self.octet_str)
+            os.system('echo ' + password + ' | sudo -S rm -rf /tmp/24GHz' + 
+                self.octet_str)
+            os.system('echo ' + password + ' | sudo -S rm -rf /tmp/50GHz' + 
+                self.octet_str)
+            os.system('echo ' + password + ' | sudo -S ip addr del ' + 
+                self.tapwrt.ip + '/24 dev tap24GHz' + self.octet_str)
+            os.system('echo ' + password + ' | sudo -S ip link delete tap24GHz' + self.octet_str)
+            os.system('echo ' + password + ' | sudo -S ip addr del ' + self.tapwrt.ip + '/24 dev tap50GHz' + self.octet_str)
+            os.system('echo ' + password + ' | sudo -S ip link delete tap50GHz' + self.octet_str)
             os.system('VBoxManage controlvm num' + self.octet_str + ' poweroff')
             time.sleep(1)
             os.system('VBoxManage unregistervm --delete num' + self.octet_str)
@@ -149,16 +154,16 @@ class NodoClass(object):
 
     def start(self):
         if not self.running:
-            os.system('echo ' + password + ' | sudo -S ip tuntap add tapc24GHz' + self.octet_str + ' mode tap')
-            os.system('echo ' + password + ' | sudo -S ifconfig tapc24GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
-            os.system('echo ' + password + ' | sudo -S ip tuntap add tapc50GHz' + self.octet_str + ' mode tap')
-            os.system('echo ' + password + ' | sudo -S ifconfig tapc50GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
-            os.system('vde_switch -d --hub -s /tmp/c24GHz' + self.octet_str + ' -tap tapc24GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
-            os.system('vde_switch -d --hub -s /tmp/c50GHz' + self.octet_str + ' -tap tapc50GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
+            os.system('echo ' + password + ' | sudo -S ip tuntap add tap24GHz' + self.octet_str + ' mode tap')
+            os.system('echo ' + password + ' | sudo -S ifconfig tap24GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
+            os.system('echo ' + password + ' | sudo -S ip tuntap add tap50GHz' + self.octet_str + ' mode tap')
+            os.system('echo ' + password + ' | sudo -S ifconfig tap50GHz' + self.octet_str + ' ' + self.tapwrt.ip + ' up')
+            os.system('vde_switch -d --hub -s /tmp/24GHz' + self.octet_str + ' -tap tap24GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
+            os.system('vde_switch -d --hub -s /tmp/50GHz' + self.octet_str + ' -tap tap50GHz' + self.octet_str + ' -m 666 -f ' + dir_trabajo + '/colourful.rc')
             os.system('VBoxManage clonevm ' + self.vm + ' --name num' + self.octet_str + ' --register')
             os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic1 hostonly --hostonlyadapter1 vboxnet0 --macaddress1 ' + str(self.eth0.mac).translate(None, ':'))
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/c24GHz' + self.octet_str + '[2] --macaddress2 ' + str(self.eth1.mac).translate(None, ':'))
-            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/c50GHz' + self.octet_str + '[3] --macaddress3 ' + str(self.eth2.mac).translate(None, ':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic2 generic --nicgenericdrv2 VDE --nicproperty2 network=/tmp/24GHz' + self.octet_str + '[2] --macaddress2 ' + str(self.eth1.mac).translate(None, ':'))
+            os.system('VBoxManage modifyvm num' + self.octet_str + ' --nic3 generic --nicgenericdrv3 VDE --nicproperty3 network=/tmp/50GHz' + self.octet_str + '[3] --macaddress3 ' + str(self.eth2.mac).translate(None, ':'))
             os.system('VBoxManage startvm num' + self.octet_str + node_head)  # + '--type headless'
             self.running = True
 
@@ -173,16 +178,16 @@ class WireClass(object):
         self.s_str = str(point2num(self.s))
         self.d_str = str(point2num(self.d))
         self.name = "wire" + self.s_str + '-' + self.d_str
-        self.canal = self.quality['channel']
+        self.canal = self.quality['ch']
         self.running = False
-        self.prop = {'loss': self.quality['loss'],
-                     'delay': self.quality['delay'],
-                     'dup': self.quality['dup'],
-                     'bandwith': self.quality['bandwith'],
-                     'speed': self.quality['speed'],
-                     'capacity': self.quality['capacity'],
-                     'damage': self.quality['damage'],
-                     'channel': self.quality['channel']}
+        self.prop = {'lo': self.quality['lo'],
+                     'de': self.quality['de'],
+                     'du': self.quality['du'],
+                     'bw': self.quality['bw'],
+                     'sp': self.quality['sp'],
+                     'ca': self.quality['ca'],
+                     'da': self.quality['da'],
+                     'ch': self.quality['ch']}
 
     def __del__(self):
         if nodolist.run:
@@ -194,20 +199,20 @@ class WireClass(object):
     def start(self):
         if not self.running:
             od = 'wirefilter' + ' --daemon -v /tmp/' + self.canal + self.s_str + ':/tmp/' + self.canal + self.d_str
-            if self.prop['loss'] != 0:
-                od = od + ' -l ' + str(self.prop['loss'])
-            if self.prop['delay'] != 0:
-                od = od + ' -d ' + str(self.prop['delay']) + '+' + str(self.prop['delay'] / 2) + 'N'
-            if self.prop['dup'] != 0:
-                od = od + ' -D ' + str(self.prop['dup'])
-            if self.prop['bandwith'] != 0:
-                od = od + ' -b ' + str(self.prop['bandwith'])
-            if self.prop['speed'] != 0:
-                od = od + ' -s ' + str(self.prop['speed'])
-            if self.prop['capacity'] != 0:
-                od = od + ' -c ' + str(self.prop['capacity'])
-            if self.prop['damage'] != 0:
-                od = od + ' -n ' + str(self.prop['damage'])
+            if self.prop['lo'] != 0:
+                od = od + ' -l ' + str(self.prop['lo'])
+            if self.prop['de'] != 0:
+                od = od + ' -d ' + str(self.prop['de']) + '+' + str(self.prop['de'] / 2) + 'N'
+            if self.prop['du'] != 0:
+                od = od + ' -D ' + str(self.prop['du'])
+            if self.prop['bw'] != 0:
+                od = od + ' -b ' + str(self.prop['bw'])
+            if self.prop['sp'] != 0:
+                od = od + ' -s ' + str(self.prop['sp'])
+            if self.prop['ca'] != 0:
+                od = od + ' -c ' + str(self.prop['ca'])
+            if self.prop['da'] != 0:
+                od = od + ' -n ' + str(self.prop['da'])
             os.system(od)
             self.running = True
 
@@ -428,18 +433,22 @@ def dibujar(widget):
     cr = widget.window.cairo_create()
     w = widget.allocation.width
     h = widget.allocation.height
+    print w, h
     cr.set_source_rgb(0.0, 0.0, 0.0)
     cr.rectangle(0, 0, w, h)
     cr.fill()
+#    import ipdb; ipdb.set_trace()
     # Draw background grid
     cr.set_line_width(1)
     cr.set_source_rgba(0.1, 0.1, 0.1, 1.0)
-    for i in range(10):
+    nv = int((w - 201) / 100)
+    nh = int((h - 99) / 100)
+    for i in range(10):      #vertical line
         cr.move_to(i * 100, 0)
-        cr.line_to(i * 100, 1000)
-    for i in range(11):
+        cr.line_to(i * 100, 100 * nh)
+    for i in range(nh + 1):  #horizontal line
         cr.move_to(0, i * 100)
-        cr.line_to(900, i * 100)
+        cr.line_to(100 * (9), i * 100)
     cr.stroke()
     # Draw wire
     cr.select_font_face('Sans')
@@ -447,18 +456,19 @@ def dibujar(widget):
     for l in link_color24:
         if l.sd in link_color24.current_wire:
             # Draw wire property for current wire
-            cr.set_source_rgba(0.0, 0.0, 1.0, 1.0)  # blue
+            cr.set_source_rgba(0.3, 0.7, 1.0, 1.0)  # blue
             i = 0
             for p in l.prop:
-                cr.move_to(i * 100, 30)
+                cr.move_to(i * 70, 45)
                 cr.show_text(p + ': ' + str(l.prop[p]))
                 i += 1
-            cr.set_source_rgba(0.0, 0.0, 1.0, 1.0)  # blue
+            cr.set_source_rgba(0.3, 0.7, 1.0, 1.0)  # blue
             cr.set_line_width(4.0)
         else:
-            cr.set_source_rgba(0.0, 0.0, 1.0, 1.0)  # blue
+            cr.set_source_rgba(0.3, 0.7, 1.0, 1.0)  # blue
             cr.set_line_width(2.0)
-        if trace_l2 and (str(point2num(l.sd[0])) in node_tr and str(point2num(l.sd[1]))) in node_tr:
+        if trace_l2 and (str(point2num(l.sd[0])) in node_tr and 
+        	str(point2num(l.sd[1]))) in node_tr:
             cr.set_source_rgba(1.0, 1.0, 1.0, 0.5)
         (xi, yi), (xf, yf) = l.sd
         cr.move_to(xi, yi)
@@ -470,7 +480,7 @@ def dibujar(widget):
             cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)  # green
             i = 0
             for p in l.prop:
-                cr.move_to(i * 100, 45)
+                cr.move_to(i * 70, 60)
                 cr.show_text(p + ': ' + str(l.prop[p]))
                 i += 1
             cr.set_source_rgba(0.0, 1.0, 0.0, 0.5)  # green
@@ -492,7 +502,8 @@ def dibujar(widget):
         if nodolist.run:
             if po.count == 0:
                 mibr = netsnmp.Varbind('iso.3.6.1.4.1.2021.10.1.3.1')
-                po.load_average = netsnmp.snmpget(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)[0]
+                po.load_average = netsnmp.snmpget(mibr, Version=2,
+                       DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)[0]
                 if po.load_average is None:
                     cr.set_source_rgba(0.6, 0.0, 0.0, 1.0)
                 elif float(po.load_average) > 1:
@@ -500,9 +511,11 @@ def dibujar(widget):
                 else:
                     cr.set_source_rgba(0.1, 0.6, 0.1, 1.0)
                     mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.11')
-                    rx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
+                    rx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip,
+                    Community='public', Timeout=5000, Retries=1)
                     mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
-                    tx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
+                    tx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip,
+                    Community='public', Timeout=5000, Retries=1)
                     for i in po.interfases:
                         if i.ind:
                             if i.ind < len(rx):
@@ -518,15 +531,15 @@ def dibujar(widget):
                 cr.set_source_rgba(1.0, 0.0, 0.3, 1.0)
         if po.pos == nodolist.current.pos:
             cr.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # yellow
-            cr.move_to(1, 60)
+            cr.move_to(400, 30)
             cr.show_text('vm: ' + po.vm)
             # Draw originators for curren nodo
             if nodolist.run:
                 cr.set_source_rgba(1.0, 1.0, 1.0, 1.0)
-                cr.move_to(950, 15)
+                cr.move_to(w-251, 15)
                 cr.show_text("Originators")
                 cr.set_source_rgba(1.0, 1.0, 1.0, 1.0)
-                cr.move_to(950 + 125, 15)
+                cr.move_to(w-251 + 125, 15)
                 cr.show_text("Next Hop")
 #               o,n = po.get_originators_nexthop()
                 rg = len(o)
@@ -536,15 +549,19 @@ def dibujar(widget):
                     cr.set_source_rgba(0.0, 0.7, 0.7, 1.0)
                     if i & 0x01:
                         cr.set_source_rgba(0.0, 1.0, 1.0, 1.0)
-                    cr.move_to(950, 40 + i * 15)
+                    cr.move_to(w-251, 40 + i * 15)
                     cr.show_text(str(o[i]))
-                    cr.move_to(950 + 125, 40 + i * 15)
+                    cr.move_to(w-251 + 125, 40 + i * 15)
                     cr.show_text(str(n[i]))
             # Drow Interface packets for curren nodo
                 for i in po.interfases:
                     if i.ind:
-                        cr.move_to(200 * (i.ind - 1), 15)
-                        cr.show_text(i.name + ' rx: ' + i.rx + ' tx: ' + i.tx)
+                    	if i.ind < 4:
+                            cr.move_to(200 * (i.ind - 1), 15)
+                            cr.show_text(i.name + ' rx: ' + i.rx + ' tx: ' + i.tx)
+                    	if i.ind > 3:
+                            cr.move_to(200 * (i.ind - 4), 30)
+                            cr.show_text(i.name + ' rx: ' + i.rx + ' tx: ' + i.tx)                            
                     cr.set_source_rgba(0.3, 1.0, 0.3, 1.0)
 #       else:
 #           cr.set_source_rgba(0.1,0.6, 0.1,1.0)
@@ -565,14 +582,14 @@ def dibujar(widget):
     cr.stroke()
     if trace_l2:
         x = -60
-        y = 950
+        y = h-49
         cr.set_line_width(1.0)
         for i in node_tr:
             if len(i) == 2:
                 x = x + 80
-                if x > 900:
+                if x > w-301:
                     x = 20
-                    y = 975
+                    y = h-24
                 cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)
                 cr.move_to(x + 12, y)
                 cr.arc(x, y, 12, 0, 2 * math.pi)
@@ -608,7 +625,11 @@ def button_press_event(widget, event):
 def button_release_event(widget, event):
     global wire_prop, trace_l2, node_tr, o, n
     fin = near((event.x, event.y))
-    if fin[0] < 950 and fin[0] > 50 and fin[1] < 950 and fin[1] > 50:
+    w = widget.allocation.width
+    h = widget.allocation.height
+    nv = int((w - 201) / 100)
+    nh = int((h - 99) / 100)
+    if fin[0] <100*10 and fin[0] > 50 and fin[1] < h-49 and fin[1] > 50:
         if event.button == 1 and cr is not None:
             if inicio == fin:
                 if not nodolist.run and not any(x.pos == inicio for x in nodolist):
@@ -634,13 +655,13 @@ def button_release_event(widget, event):
                 else:
                     link_color24.current_wire = [(inicio, fin), (fin, inicio)]
                     link_color50.current_wire = [(inicio, fin), (fin, inicio)]
-                    if wire_prop['channel'] == 'c24GHz':
+                    if wire_prop['ch'] == '24GHz':
                         if (not any(x.sd in link_color24.current_wire for x in link_color24)):
                             link_color24.append(WireClass(inicio, fin, wire_prop))
                             if nodolist.run:
                                 link_color24.start()
                                 link_color50.start()
-                    if wire_prop['channel'] == 'c50GHz':
+                    if wire_prop['ch'] == '50GHz':
                         if (not any(x.sd in link_color50.current_wire for x in link_color50)):
                             link_color50.append(WireClass(inicio, fin, wire_prop))
                             if nodolist.run:
@@ -656,14 +677,14 @@ def button_release_event(widget, event):
                                 o, n = x.get_originators_nexthop()
             else:
                 link_color24.current_wire = [(inicio, fin), (fin, inicio)]
-                if wire_prop['channel'] == 'c24GHz':
+                if wire_prop['ch'] == '24GHz':
                     if any(x.pos in [inicio, fin] for x in nodolist):
                         if any(x.sd in link_color24.current_wire for x in link_color24):
                             for x in link_color24:
                                 if x.ds in link_color24.current_wire:
                                     wire_prop = x.prop
                 link_color50.current_wire = [(inicio, fin), (fin, inicio)]
-                if wire_prop['channel'] == 'c50GHz':
+                if wire_prop['ch'] == '50GHz':
                     if any(x.pos in [inicio, fin] for x in nodolist):
                         if any(x.sd in link_color50.current_wire for x in link_color50):
                             for x in link_color50:
@@ -679,12 +700,12 @@ def button_release_event(widget, event):
                                 nid = nodolist.index(x)
                                 i = nodolist.pop(nid)
             elif any(x.pos == inicio for x in nodolist) and any(x.pos == fin for x in nodolist):
-                if wire_prop['channel'] == 'c24GHz':
+                if wire_prop['ch'] == '24GHz':
                     for x in link_color24:
                         if x.sd in [(inicio, fin), (fin, inicio)]:
                             lid = link_color24.index(x)
                             i = link_color24.pop(lid)
-                if wire_prop['channel'] == 'c50GHz':
+                if wire_prop['ch'] == '50GHz':
                     for x in link_color50:
                         if x.sd in [(inicio, fin), (fin, inicio)]:
                             lid = link_color50.index(x)
@@ -745,7 +766,7 @@ def on_changed(widget):
 
 def callback(self, button):
     global wire_prop
-    wire_prop['channel'] = button
+    wire_prop['ch'] = button
 
 
 class Wire(gtk.Window):
@@ -765,10 +786,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj1 = gtk.Adjustment(wire_prop['loss'], 0.0, 101.0, 1.0, 1.0, 1.0)
+        adj1 = gtk.Adjustment(wire_prop['lo'], 0.0, 101.0, 1.0, 1.0, 1.0)
         vscale1 = gtk.HScale(adj1)
         scale_set_default_values(vscale1)
-        vscale1.set_name('loss')
+        vscale1.set_name('lo')
         vbox1.pack_start(vscale1, True, True, 0)
         vscale1.connect("value-changed", on_changed)
         vscale1.show()
@@ -777,10 +798,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj2 = gtk.Adjustment(wire_prop['delay'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj2 = gtk.Adjustment(wire_prop['de'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale2 = gtk.HScale(adj2)
         scale_set_default_values(vscale2)
-        vscale2.set_name('delay')
+        vscale2.set_name('de')
         vbox1.pack_start(vscale2, True, True, 0)
         vscale2.connect("value-changed", on_changed)
         vscale2.show()
@@ -789,10 +810,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj3 = gtk.Adjustment(wire_prop['dup'], 0.0, 101.0, 1.0, 1.0, 1.0)
+        adj3 = gtk.Adjustment(wire_prop['du'], 0.0, 101.0, 1.0, 1.0, 1.0)
         vscale3 = gtk.HScale(adj3)
         scale_set_default_values(vscale3)
-        vscale3.set_name('dup')
+        vscale3.set_name('du')
         vbox1.pack_start(vscale3, True, True, 0)
         vscale3.connect("value-changed", on_changed)
         vscale3.show()
@@ -801,10 +822,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj4 = gtk.Adjustment(wire_prop['bandwith'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj4 = gtk.Adjustment(wire_prop['bw'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale4 = gtk.HScale(adj4)
         scale_set_default_values(vscale4)
-        vscale4.set_name('bandwith')
+        vscale4.set_name('bw')
         vbox1.pack_start(vscale4, True, True, 0)
         vscale4.connect("value-changed", on_changed)
         vscale4.show()
@@ -813,10 +834,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj5 = gtk.Adjustment(wire_prop['speed'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj5 = gtk.Adjustment(wire_prop['sp'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale5 = gtk.HScale(adj5)
         scale_set_default_values(vscale5)
-        vscale5.set_name('speed')
+        vscale5.set_name('sp')
         vbox1.pack_start(vscale5, True, True, 0)
         vscale5.connect("value-changed", on_changed)
         vscale5.show()
@@ -825,10 +846,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj6 = gtk.Adjustment(wire_prop['capacity'], 0.0, 1001.0, 1.0, 1.0, 1.0)
+        adj6 = gtk.Adjustment(wire_prop['ca'], 0.0, 1001.0, 1.0, 1.0, 1.0)
         vscale6 = gtk.HScale(adj6)
         scale_set_default_values(vscale6)
-        vscale6.set_name('capacity')
+        vscale6.set_name('ca')
         vbox1.pack_start(vscale6, True, True, 0)
         vscale6.connect("value-changed", on_changed)
         vscale6.show()
@@ -837,10 +858,10 @@ class Wire(gtk.Window):
         vbox1.pack_start(label1, True, True, 0)
         label1.show()
 
-        adj7 = gtk.Adjustment(wire_prop['damage'], 0.0, 101.0, 1.0, 1.0, 1.0)
+        adj7 = gtk.Adjustment(wire_prop['da'], 0.0, 101.0, 1.0, 1.0, 1.0)
         vscale7 = gtk.HScale(adj7)
         scale_set_default_values(vscale7)
-        vscale7.set_name('damage')
+        vscale7.set_name('da')
         vbox1.pack_start(vscale7, True, True, 0)
         vscale7.connect("value-changed", on_changed)
         vscale7.show()
@@ -851,14 +872,14 @@ class Wire(gtk.Window):
         hbox1.show()
 
         button = gtk.RadioButton(None, "2.4 GHz")
-        button.connect("toggled", callback, "c24GHz")
-        if wire_prop['channel'] == "c24GHz":
+        button.connect("toggled", callback, "24GHz")
+        if wire_prop['ch'] == "24GHz":
             button.set_active(gtk.TRUE)
         hbox1.pack_start(button, gtk.TRUE, gtk.TRUE, 0)
         button.show()
         button = gtk.RadioButton(button, "5.0 GHz")
-        button.connect("toggled", callback, "c50GHz")
-        if wire_prop['channel'] == "c50GHz":
+        button.connect("toggled", callback, "50GHz")
+        if wire_prop['ch'] == "50GHz":
             button.set_active(gtk.TRUE)
         hbox1.pack_start(button, gtk.TRUE, gtk.TRUE, 0)
         button.show()
@@ -906,8 +927,11 @@ def create_colorfull(dir_trabajo):
 class MenuApp(gtk.Window):
     def __init__(self):
         super(MenuApp, self).__init__()
+        screen = self.get_screen()
         self.set_title("Mesh network emulator")
-        self.set_size_request(1201, 1001)
+        self.set_size_request(min(screen.get_width(), 800),
+                              min(screen.get_height(), 600))
+#     	self.maximize()
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(6400, 6400, 6440))
         self.set_position(gtk.WIN_POS_CENTER)
         # top level menu bar
