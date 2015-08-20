@@ -114,8 +114,12 @@ class NodoClass(object):
         self.eth1 = Interface(3, 'eth1', str(self), self.smp_ip)
         self.eth2 = Interface(4, 'eth2', str(self), self.smp_ip)
         self.bat0 = Interface(5, 'bat0', str(self), self.smp_ip)
+<<<<<<< HEAD
         self.interfases = [self.tapwrt, self.oam, self.lo, self.eth0, 
                            self.eth1, self.eth2, self.bat0]
+=======
+        self.interfaces = [self.tapwrt, self.oam, self.lo, self.eth0, self.eth1, self.eth2, self.bat0]
+>>>>>>> f5e62b78799f1cf4662b5edfd3edaef3a6eb5d09
         self.originator_nexthop = ['None'], ['None']
         self.vm = v_name_base
         self.load_average = '0.00'
@@ -258,10 +262,12 @@ def open_mesh(widget):
     global link_color24, link_color50, nodolist
     if not nodolist.run:
         dialog = gtk.FileChooserDialog(
-            "Select a mesh file",
-            None,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            title="Select a mesh file",
+            parent=None,
+            action=gtk.FILE_CHOOSER_ACTION_OPEN,
+            buttons=(gtk.STOCK_CANCEL,
+                     gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             file_path = dialog.get_filename()
@@ -276,11 +282,11 @@ def open_mesh(widget):
 
 
 def message_stop():
-    md = gtk.MessageDialog(None,
-                           gtk.DIALOG_DESTROY_WITH_PARENT,
-                           gtk.MESSAGE_INFO,
-                           gtk.BUTTONS_CLOSE,
-                           "Firs stop emulation")
+    md = gtk.MessageDialog(parent=None,
+                           flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                           type=gtk.MESSAGE_INFO,
+                           buttons=gtk.BUTTONS_CLOSE,
+                           message_format="First stop emulation.")
     md.run()
     md.destroy()
 
@@ -296,11 +302,11 @@ def save_mesh(signal):
 
 def save_as_mesh(signal):
     if not nodolist.run:
-        dialog = gtk.FileChooserDialog("Select or create a mesh file",
-                                       None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog = gtk.FileChooserDialog(title="Select or create a mesh file",
+                                       parent=None,
+                                       flags=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                                gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             file_path = dialog.get_filename()
@@ -339,20 +345,21 @@ def response_to_dialog(entry, dialog, response):
 
 def get_password():
     dialog = gtk.MessageDialog(
-        None,
-        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-        gtk.MESSAGE_QUESTION,
-        gtk.BUTTONS_OK,
-        None)
+        parent=None,
+        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+        type=gtk.MESSAGE_QUESTION,
+        buttons=gtk.BUTTONS_OK,
+        message_format=None)
     dialog.set_markup('Please enter your <b>password</b>:')
     entry = gtk.Entry()
     entry.connect("activate", response_to_dialog, dialog, gtk.RESPONSE_OK)
-    entry.set_visibility(False)
+    entry.set_visibility(False)  # Hide password chars
     hbox = gtk.HBox()
     hbox.pack_start(gtk.Label("Password:"), False, 5, 5)
     hbox.pack_end(entry)
     dialog.format_secondary_markup("This will be used for create interfaces in your local machine")
     dialog.vbox.pack_end(hbox, True, True, 0)
+    dialog.set_position(gtk.WIN_POS_CENTER)
     dialog.show_all()
     dialog.run()
     text = entry.get_text()
@@ -514,9 +521,14 @@ def dibujar(widget):
                     rx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip,
                     Community='public', Timeout=5000, Retries=1)
                     mibr = netsnmp.Varbind('iso.3.6.1.2.1.2.2.1.17')
+<<<<<<< HEAD
                     tx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip,
                     Community='public', Timeout=5000, Retries=1)
                     for i in po.interfases:
+=======
+                    tx = netsnmp.snmpwalk(mibr, Version=2, DestHost=po.smp_ip, Community='public', Timeout=5000, Retries=1)
+                    for i in po.interfaces:
+>>>>>>> f5e62b78799f1cf4662b5edfd3edaef3a6eb5d09
                         if i.ind:
                             if i.ind < len(rx):
                                 i.rx = rx[i.ind - 1]
@@ -554,7 +566,7 @@ def dibujar(widget):
                     cr.move_to(w-251 + 125, 40 + i * 15)
                     cr.show_text(str(n[i]))
             # Drow Interface packets for curren nodo
-                for i in po.interfases:
+                for i in po.interfaces:
                     if i.ind:
                     	if i.ind < 4:
                             cr.move_to(200 * (i.ind - 1), 15)
@@ -582,14 +594,24 @@ def dibujar(widget):
     cr.stroke()
     if trace_l2:
         x = -60
+<<<<<<< HEAD
         y = h-49
+=======
+        y = h - 50
+>>>>>>> f5e62b78799f1cf4662b5edfd3edaef3a6eb5d09
         cr.set_line_width(1.0)
         for i in node_tr:
             if len(i) == 2:
                 x = x + 80
+<<<<<<< HEAD
                 if x > w-301:
                     x = 20
                     y = h-24
+=======
+                if x > w -900:
+                    x = 20
+                    y = h - 25
+>>>>>>> f5e62b78799f1cf4662b5edfd3edaef3a6eb5d09
                 cr.set_source_rgba(0.0, 1.0, 0.0, 1.0)
                 cr.move_to(x + 12, y)
                 cr.arc(x, y, 12, 0, 2 * math.pi)
@@ -931,7 +953,11 @@ class MenuApp(gtk.Window):
         self.set_title("Mesh network emulator")
         self.set_size_request(min(screen.get_width(), 800),
                               min(screen.get_height(), 600))
+<<<<<<< HEAD
 #     	self.maximize()
+=======
+        self.maximize()
+>>>>>>> f5e62b78799f1cf4662b5edfd3edaef3a6eb5d09
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(6400, 6400, 6440))
         self.set_position(gtk.WIN_POS_CENTER)
         # top level menu bar
@@ -964,7 +990,7 @@ class MenuApp(gtk.Window):
         saveas = gtk.MenuItem("Save as")
         filemenu.append(saveas)
         saveas.connect("activate", save_as_mesh)
-    # separator
+        # separator
         separat = gtk.SeparatorMenuItem()
         filemenu.append(separat)
 
@@ -1047,7 +1073,7 @@ class MenuApp(gtk.Window):
 
     # Create the drawing area
         drawing_area = gtk.DrawingArea()
-        drawing_area.set_size_request(1000, 1000)
+        # drawing_area.set_size_request(1000, 1000)
         drawing_area.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(0, 0, 0))
         vbox.pack_start(drawing_area, True, True, 0)
         drawing_area.show()
